@@ -1,0 +1,148 @@
+# Social Network Diagram Format - валидный YAML
+
+center: "Иван"
+
+people:
+  - name: "Мария"
+    sector: family
+    circle: 1
+    importance: important
+    strength: strong      # strong|normal|weak - интенсивность связи с центром
+    direction: mutual     # mutual|outgoing|incoming - направление инициативы
+    quality: positive     # positive|negative|neutral - знак отношений
+    color_group: red
+  
+  - name: "Петр"
+    sector: work
+    circle: 1
+    importance: important
+    strength: normal
+    direction: outgoing
+    quality: positive
+    color_group: blue
+  
+  - name: "Анна"
+    sector: friends
+    circle: 1
+    importance: normal
+    strength: normal
+    direction: mutual
+    quality: positive
+    color_group: green
+  
+  - name: "Сергей"
+    sector: work
+    circle: 2
+    importance: normal
+    strength: weak
+    direction: incoming
+    quality: neutral
+    color_group: blue
+  
+  - name: "Елена"
+    sector: family
+    circle: 2
+    importance: normal
+    strength: normal
+    direction: mutual
+    quality: positive
+    color_group: red
+  
+  - name: "Дмитрий"
+    sector: study
+    circle: 2
+    importance: important
+    strength: strong
+    direction: mutual
+    quality: positive
+    color_group: yellow
+  
+  - name: "Ольга"
+    sector: hobby
+    circle: 3
+    importance: normal
+    strength: weak
+    direction: outgoing
+    quality: negative
+    color_group: purple
+
+# Связи между людьми (кто кого знает)
+peer_connections:
+  - from: "Мария"
+    to: "Елена"
+    strength: normal
+    quality: positive
+    color_group: red
+  
+  - from: "Петр"
+    to: "Сергей"
+    strength: normal
+    direction: mutual
+    quality: neutral
+    color_group: blue
+  
+  - from: "Анна"
+    to: "Дмитрий"
+    strength: weak
+    direction: incoming
+    quality: positive
+
+# Логика размещения для детерминированного рендеринга
+layout:
+  # Алгоритм размещения людей в секторах
+  sector_distribution:
+    family: 0        # начальный угол сектора в градусах
+    work: 60
+    friends: 120
+    study: 180
+    hobby: 240
+    other: 300
+  
+  # Правила для стабильного позиционирования
+  positioning_rules:
+    # Сортировка людей в каждом секторе для предсказуемости
+    sort_by: ["circle", "importance", "name"]  # по кругу, важности, затем по алфавиту
+    
+    # Распределение внутри сектора
+    angle_spread: 50  # градусы для распределения людей в секторе
+    
+    # Радиусы кругов
+    circle_radius:
+      1: 100
+      2: 160
+      3: 220
+
+# Настройки отображения
+display:
+  show_sector_labels: true
+  show_circles: true
+  
+  # Стили линий
+  line_styles:
+    strong: 
+      width: 3
+      style: solid
+    normal:
+      width: 2
+      style: solid
+    weak:
+      width: 1
+      style: dashed
+  
+  # Стили точек
+  point_styles:
+    important:
+      size: 8
+      style: filled
+    normal:
+      size: 6
+      style: filled
+  
+  # Цветовая схема
+  colors:
+    red: "#FF6B6B"
+    blue: "#4ECDC4"
+    green: "#45B7D1"
+    yellow: "#96CEB4"
+    purple: "#FFEAA7"
+    orange: "#DDA0DD"

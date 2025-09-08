@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Network Diagram</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            width: 100%;
+        }
+        body {
+            height: 100vh;
+            width: 100vw;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+        #cy {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            border: none;
+            z-index: 1;
+        }
+        .info {
+            position: absolute;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            min-width: 300px;
+            max-width: 500px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background: #f9f9f9;
+            z-index: 2;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        h1 {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2;
+            background: rgba(255,255,255,0.8);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 1.5em;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center;">Диаграмма социальных связей</h1>
+    
+    <div id="cy"></div>
+    
+    <div class="info">
+        <div id="node-info">Кликните на узел для получения информации</div>
+    </div>
+
+    <script>
+        // YAML данные
+        const yamlData = `
+center: "Иван"
+
+people:
+  - name: "Мария"
+    sector: family
+    circle: 1
+    importance: important
+    color_group: red
+  
+  - name: "Петр"
+    sector: work
+    circle: 1
+    importance: important
+    color_group: blue
+  
+  - name: "Анна"
+    sector: friends
+    circle: 1
+    importance: normal
+    color_group: green
+  
+  - name: "Сергей"
+    sector: work
+    circle: 2
+    importance: normal
+    color_group: blue
+  
+  - name: "Елена"
+    sector: family
+    circle: 2
+    importance: normal
+    color_group: red
+  
+  - name: "Дмитрий"
+    sector: study
+    circle: 2
+    importance: important
+    color_group: yellow
+
+peer_connections:
+  - from: "Мария"
+    to: "Елена"
+    strength: normal
+  
+  - from: "Петр"
+    to: "Сергей"
+    strength: normal
+
+layout:
+  sector_distribution:
+    family: 0
+    work: 90
+    friends: 180
+    study: 270
+  
+  circle_radius:
+    1: 120
+    2: 200
+`;
+
+        // Парсим YAML
+        const data = jsyaml.load(yamlData);
+        
+        // Цвета
+        const colors = {
+            red: "#FF6B6B",
+            blue: "#4ECDC4", 
+            green: "#45B7D1",
+            yellow: "#96CEB4"
+        };
+
+        // Расчет позиции узла
+        function calculatePosition(person, data) {
+            // Place node inside the correct sector and circle, offset from sector line
+            const sectorAngle = data.layout.sector_distribution[person.sector] || 0;
+            const circleRadius = data.layout.circle_radius[person.circle] || 100;
+            // Find all people in this sector and circle
+            const peopleInSector = data.people.filter(p => p.sector === person.sector && p.circle === person.circle);
+            const idx = peopleInSector.findIndex(p => p.name === person.name);
+            const total = peopleInSector.length;
+            // Spread nodes well inside sector: +/- 35 degrees from sector line
+            const sectorSpread = 70; // degrees, wider for deeper placement
+            let angleOffset = 0;
+            if (total > 1) {
+                angleOffset = ((idx + 1) - (total + 1) / 2) * (sectorSpread / (total));
+            } else {
+                angleOffset = sectorSpread / 4; // single node, push off the line
+            }
+            const angle = sectorAngle + angleOffset;
+            const angleRad = angle * Math.PI / 180;
+            // Use 70% of the radius for deeper inside placement
+            const nodeRadius = circleRadius * 0.7;
+            return {
+                x: Math.cos(angleRad) * nodeRadius,
+                y: Math.sin(angleRad) * nodeRadius
+            };
+        }
+
+        // Создание элементов
+        function createElements(data) {
+            const elements = [];
+            
+            // Центральный узел
+            elements.push({
+                data: { 
+                    id: data.center, 
+                    name: data.center, 
+                    type: 'center'
+                },
+                position: { x: 0, y: 0 }
+            });
+
+            // Секторные линии и метки
+            const sectorEntries = Object.entries(data.layout.sector_distribution);
+            const sectorAngles = sectorEntries.map(([_, angle]) => angle);
+            const maxRadius = Math.max(...Object.values(data.layout.circle_radius));
+            sectorEntries.forEach(([sectorName, angle], idx) => {
+                const angleRad = angle * Math.PI / 180;
+                const x = Math.cos(angleRad) * maxRadius;
+                const y = Math.sin(angleRad) * maxRadius;
+                const nodeId = `sector-guide-${idx}`;
+                // Add guide node at edge
+                elements.push({
+                    data: { id: nodeId, type: 'sector-guide' },
+                    position: { x: x, y: y }
+                });
+                // Add edge from center to guide node
+                elements.push({
+                    data: {
+                        id: `sector-line-${idx}`,
+                        source: data.center,
+                        target: nodeId,
+                        type: 'sector-line'
+                    }
+                });
+                // Calculate middle angle for label
+                let nextIdx = (idx + 1) % sectorAngles.length;
+                let startAngle = angle;
+                let endAngle = sectorAngles[nextIdx];
+                // Ensure correct ordering for wrap-around
+                if (endAngle <= startAngle) endAngle += 360;
+                const midAngle = startAngle + (endAngle - startAngle) / 2;
+                const midAngleRad = midAngle * Math.PI / 180;
+                const labelRadius = maxRadius + 30;
+                const labelX = Math.cos(midAngleRad) * labelRadius;
+                const labelY = Math.sin(midAngleRad) * labelRadius;
+                elements.push({
+                    data: {
+                        id: `sector-label-${idx}`,
+                        type: 'sector-label',
+                        label: sectorName
+                    },
+                    position: { x: labelX, y: labelY }
+                });
+            });
+            
+            // Люди
+            data.people.forEach(person => {
+                const pos = calculatePosition(person, data);
+                elements.push({
+                    data: { 
+                        id: person.name,
+                        name: person.name,
+                        type: 'person',
+                        sector: person.sector,
+                        circle: person.circle,
+                        importance: person.importance,
+                        color_group: person.color_group
+                    },
+                    position: pos
+                });
+            });
+            
+            // Связи между людьми
+            if (data.peer_connections) {
+                data.peer_connections.forEach(conn => {
+                    elements.push({
+                        data: {
+                            id: `${conn.from}-${conn.to}`,
+                            source: conn.from,
+                            target: conn.to,
+                            strength: conn.strength
+                        }
+                    });
+                });
+            }
+            
+                // Направляющие круги как линии (многоугольник)
+                [120, 200].forEach((radius, index) => {
+                    const points = 64; // больше точек для плавности
+                    const guideNodeIds = [];
+                    for (let i = 0; i < points; i++) {
+                        const angle = (i / points) * 2 * Math.PI;
+                        const x = Math.cos(angle) * radius;
+                        const y = Math.sin(angle) * radius;
+                        const nodeId = `circle-${index}-pt-${i}`;
+                        guideNodeIds.push(nodeId);
+                        elements.push({
+                            data: { 
+                                id: nodeId,
+                                type: 'guide'
+                            },
+                            position: { x: x, y: y }
+                        });
+                    }
+                    // Добавляем ребра между точками для создания линии
+                    for (let i = 0; i < points; i++) {
+                        const source = guideNodeIds[i];
+                        const target = guideNodeIds[(i + 1) % points];
+                        elements.push({
+                            data: {
+                                id: `circle-${index}-edge-${i}`,
+                                source: source,
+                                target: target,
+                                type: 'guide-edge'
+                            }
+                        });
+                    }
+                });
+            
+            return elements;
+        }
+
+        // Инициализация Cytoscape
+        const cy = cytoscape({
+            container: document.getElementById('cy'),
+            elements: createElements(data),
+            
+            style: [
+                // Секторные метки
+                {
+                    selector: 'node[type = "sector-label"]',
+                    style: {
+                        'background-opacity': 0,
+                        'label': 'data(label)',
+                        'color': '#444',
+                        'font-size': '16px',
+                        'font-weight': 'bold',
+                        'text-background-opacity': 1,
+                        'text-background-color': '#fff',
+                        'text-background-shape': 'roundrectangle',
+                        'text-border-opacity': 0.2,
+                        'text-border-color': '#ccc',
+                        'text-border-width': 1,
+                        'text-margin-y': 0,
+                        'z-index': 10
+                    }
+                },
+                // Центральный узел
+                {
+                    selector: 'node[type = "center"]',
+                    style: {
+                        'background-color': '#333',
+                        'width': 30,
+                        'height': 30,
+                        'label': 'data(name)',
+                        'color': 'white',
+                        'text-valign': 'center',
+                        'font-size': '12px',
+                        'font-weight': 'bold'
+                    }
+                },
+                // Секторные точки (невидимые)
+                {
+                    selector: 'node[type = "sector-guide"]',
+                    style: {
+                        'width': 0.1,
+                        'height': 0.1,
+                        'background-color': '#ddd',
+                        'label': '',
+                        'events': 'no',
+                        'opacity': 0.0
+                    }
+                },
+                // Секторные линии
+                {
+                    selector: 'edge[type = "sector-line"]',
+                    style: {
+                        'width': 2,
+                        'line-color': '#bbb',
+                        'curve-style': 'straight',
+                        'opacity': 0.8,
+                        'z-index': 0
+                    }
+                },
+                
+                // Обычные узлы
+                {
+                    selector: 'node[type = "person"]',
+                    style: {
+                        'background-color': function(ele) {
+                            return colors[ele.data('color_group')] || '#999';
+                        },
+                        'width': function(ele) {
+                            return ele.data('importance') === 'important' ? 25 : 20;
+                        },
+                        'height': function(ele) {
+                            return ele.data('importance') === 'important' ? 25 : 20;
+                        },
+                        'label': 'data(name)',
+                        'color': '#333',
+                        'text-valign': 'bottom',
+                        'text-margin-y': 5,
+                        'font-size': '11px'
+                    }
+                },
+                
+                    // Направляющие точки
+                    {
+                        selector: 'node[type = "guide"]',
+                        style: {
+                            'width': 0.1,
+                            'height': 0.1,
+                            'background-color': '#ddd',
+                            'label': '',
+                            'events': 'no',
+                            'opacity': 0.0
+                        }
+                    },
+                    // Линии круга
+                    {
+                        selector: 'edge[type = "guide-edge"]',
+                        style: {
+                            'width': 1,
+                            'line-color': '#ddd',
+                            'curve-style': 'straight',
+                            'opacity': 1.0
+                        }
+                    },
+                
+                // Связи
+                {
+                    selector: 'edge',
+                    style: {
+                        'width': 2,
+                        'line-color': '#666',
+                        'curve-style': 'straight'
+                    }
+                }
+            ],
+            
+            layout: {
+                name: 'preset'
+            },
+            
+            // Отключаем перетаскивание узлов
+            autoungrabify: true,
+            
+            // Настройки взаимодействия
+            zoomingEnabled: true,
+            userZoomingEnabled: true,
+            panningEnabled: true,
+            userPanningEnabled: true,
+            
+            minZoom: 0.5,
+            maxZoom: 2
+        });
+
+        // Обработка кликов
+        cy.on('tap', 'node[type="person"], node[type="center"]', function(evt) {
+            const node = evt.target;
+            const nodeData = node.data();
+            let info = `<strong>${nodeData.name}</strong><br>`;
+            
+            if (nodeData.type === 'center') {
+                info += `Центральная персона`;
+            } else {
+                info += `Сектор: ${nodeData.sector}<br>`;
+                info += `Круг: ${nodeData.circle}<br>`;
+                info += `Важность: ${nodeData.importance}`;
+            }
+            
+            document.getElementById('node-info').innerHTML = info;
+        });
+
+        // Центрируем диаграмму
+        cy.fit();
+        
+        console.log('Диаграмма создана');
+    </script>
+</body>
+</html>
