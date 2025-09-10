@@ -1,35 +1,65 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useState, useEffect } from 'react';
+import yaml from 'js-yaml';
+import Editor from './components/Editor';
+import GraphCanvas from './components/GraphCanvas';
+import Layout from './components/Layout';
+import { processGraphDataForCytoscape } from './utils/graph-utils';
+import styles from './App.module.css';
+import './App.css';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [yamlText, setYamlText] = useState('');
+  const [cytoscapeElements, setCytoscapeElements] = useState([]);
+  const [yamlError, setYamlError] = useState(null);
+
+  useEffect(() => {
+    fetch('/graph.yml')
+      .then(response => {
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        return response.text();
+      })
+      .then(text => setYamlText(text))
+      .catch(err => {
+        console.error("Failed to load initial graph.yml:", err);
+        setYamlError(`Failed to load graph.yml: ${err.message}.`);
+      });
+  }, []);
+
+  useEffect(() => {
+    if (!yamlText) return;
+    try {
+      const graphData = yaml.load(yamlText);
+      const elements = processGraphDataForCytoscape(graphData);
+      setCytoscapeElements(elements);
+      setYamlError(null);
+    } catch (e) {
+      setYamlError(e.message);
+    }
+  }, [yamlText]);
+
+  const editorPanel = (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <div style={{ flexGrow: 1, position: 'relative' }}>
+         <Editor value={yamlText} onChange={setYamlText} />
+      </div>
+      {yamlError && (
+        <div className={styles.errorPanel}>
+          <strong>Error parsing YAML:</strong>
+          <pre style={{ margin: 0, paddingTop: '5px' }}>{yamlError}</pre>
+        </div>
+      )}
+    </div>
+  );
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div className={styles.app}>
+      <h1 className={styles.title}>Диаграмма социальных связей</h1>
+      <Layout
+        left={editorPanel}
+        right={<GraphCanvas elements={cytoscapeElements} />}
+      />
+    </div>
+  );
 }
 
-export default App
+export default App;

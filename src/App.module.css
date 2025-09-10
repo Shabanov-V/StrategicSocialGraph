@@ -1,0 +1,30 @@
+.app {
+  position: relative;
+  font-family: Arial, sans-serif;
+}
+
+.title {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  background: rgba(255, 255, 255, 0.85);
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 1.5em;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  white-space: nowrap;
+}
+
+.errorPanel {
+  padding: 10px;
+  background: rgba(220, 53, 69, 0.9);
+  color: white;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 200px;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
