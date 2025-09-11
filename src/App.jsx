@@ -12,14 +12,32 @@ function App() {
   const [graphData, setGraphData] = useState(null);
   const [cytoscapeElements, setCytoscapeElements] = useState([]);
   const [yamlError, setYamlError] = useState(null);
+  const STORAGE_KEY = 'graphYaml';
 
   useEffect(() => {
+    try {
+      const cached = localStorage.getItem(STORAGE_KEY);
+      if (cached && cached.trim().length > 0) {
+        setYamlText(cached);
+        return;
+      }
+    } catch (e) {
+      // If localStorage is unavailable, fall back to fetch
+    }
+
     fetch('/graph.yml')
       .then(response => {
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         return response.text();
       })
-      .then(text => setYamlText(text))
+      .then(text => {
+        setYamlText(text);
+        try {
+          localStorage.setItem(STORAGE_KEY, text);
+        } catch (e) {
+          // Ignore storage errors
+        }
+      })
       .catch(err => {
         console.error("Failed to load initial graph.yml:", err);
         setYamlError(`Failed to load graph.yml: ${err.message}.`);
@@ -37,6 +55,15 @@ function App() {
     } catch (e) {
       setYamlError(e.message);
       setGraphData(null);
+    }
+  }, [yamlText]);
+
+  useEffect(() => {
+    if (!yamlText || yamlText.trim().length === 0) return;
+    try {
+      localStorage.setItem(STORAGE_KEY, yamlText);
+    } catch (e) {
+      // Ignore storage errors
     }
   }, [yamlText]);
 
