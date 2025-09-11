@@ -3,7 +3,7 @@ import yaml from 'js-yaml';
 import Editor from './components/Editor';
 import GraphCanvas from './components/GraphCanvas';
 import Layout from './components/Layout';
-import { processGraphDataForCytoscape } from './utils/graph-utils';
+import { processGraphDataForCytoscape } from './utils/graph-helper';
 import styles from './App.module.css';
 import './App.css';
 

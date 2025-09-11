@@ -110,28 +110,19 @@ export const processGraphDataForCytoscape = (data) => {
     });
 
     if (data.peer_connections) {
-        const visibleConnections = [
-            { from: "Мария", to: "Елена" },
-            { from: "Петр", to: "Сергей" }
-        ];
-
+        const personNames = new Set(data.people.map(p => p.name).concat(data.center ? [data.center] : []));
         data.peer_connections.forEach(conn => {
-            const isVisible = visibleConnections.some(vc =>
-                (vc.from === conn.from && vc.to === conn.to) ||
-                (vc.from === conn.to && vc.to === conn.from)
-            );
-
-            if (isVisible) {
-                elements.push({
-                    data: {
-                        id: `${conn.from}-${conn.to}`,
-                        source: conn.from,
-                        target: conn.to,
-                        strength: conn.strength,
-                        color_group: conn.color_group
-                    }
-                });
-            }
+            if (!conn || !conn.from || !conn.to) return;
+            if (!personNames.has(conn.from) || !personNames.has(conn.to)) return;
+            elements.push({
+                data: {
+                    id: `${conn.from}-${conn.to}`,
+                    source: conn.from,
+                    target: conn.to,
+                    strength: conn.strength,
+                    color_group: conn.color_group
+                }
+            });
         });
     }
 

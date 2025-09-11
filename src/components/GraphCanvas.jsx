@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import CytoscapeComponent from 'react-cytoscapejs';
-import { getCytoscapeStyle } from '../utils/graph-utils';
+import { getCytoscapeStyle } from '../utils/graph-helper';
 
 const GraphCanvas = ({ elements, graphData }) => {
   const [selectedNodeInfo, setSelectedNodeInfo] = useState('Кликните на узел для получения информации');
