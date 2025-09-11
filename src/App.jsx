@@ -9,6 +9,7 @@ import './App.css';
 
 function App() {
   const [yamlText, setYamlText] = useState('');
+  const [graphData, setGraphData] = useState(null);
   const [cytoscapeElements, setCytoscapeElements] = useState([]);
   const [yamlError, setYamlError] = useState(null);
 
@@ -28,12 +29,14 @@ function App() {
   useEffect(() => {
     if (!yamlText) return;
     try {
-      const graphData = yaml.load(yamlText);
-      const elements = processGraphDataForCytoscape(graphData);
+      const data = yaml.load(yamlText);
+      setGraphData(data);
+      const elements = processGraphDataForCytoscape(data);
       setCytoscapeElements(elements);
       setYamlError(null);
     } catch (e) {
       setYamlError(e.message);
+      setGraphData(null);
     }
   }, [yamlText]);
 
@@ -56,7 +59,7 @@ function App() {
       <h1 className={styles.title}>Диаграмма социальных связей</h1>
       <Layout
         left={editorPanel}
-        right={<GraphCanvas elements={cytoscapeElements} />}
+        right={<GraphCanvas elements={cytoscapeElements} graphData={graphData} />}
       />
     </div>
   );

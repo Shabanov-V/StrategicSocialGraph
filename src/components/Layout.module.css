@@ -1,8 +1,8 @@
 .layout {
   display: flex;
   flex-direction: row;
-  height: 100vh;
-  width: 100vw;
+  flex-grow: 1;
+  overflow: hidden; /* Prevent child content from overflowing */
 }
 
 .leftPanel {
@@ -11,6 +11,7 @@
   position: relative;
   display: flex;
   flex-direction: column;
+  border-right: 1px solid #ddd;
 }
 
 .rightPanel {

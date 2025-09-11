@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import CytoscapeComponent from 'react-cytoscapejs';
 import { getCytoscapeStyle } from '../utils/graph-utils';
 
-const GraphCanvas = ({ elements }) => {
+const GraphCanvas = ({ elements, graphData }) => {
   const [selectedNodeInfo, setSelectedNodeInfo] = useState('Кликните на узел для получения информации');
   const cyRef = useRef(null);
 
@@ -26,16 +26,23 @@ const GraphCanvas = ({ elements }) => {
   useEffect(() => {
     const cy = cyRef.current;
     if (cy) {
-      // Fit the graph to the viewport with padding
       cy.fit(null, 30);
     }
-  }, [elements]); // Re-fit when elements change
+  }, [elements]);
+
+  if (!graphData) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', border: '1px solid #eee' }}>
+        <p>Загрузка данных или ошибка в YAML...</p>
+      </div>
+    );
+  }
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%', border: '1px solid #eee' }}>
       <CytoscapeComponent
         elements={CytoscapeComponent.normalizeElements(elements)}
-        stylesheet={getCytoscapeStyle()}
+        stylesheet={getCytoscapeStyle(graphData)}
         style={{ width: '100%', height: '100%' }}
         cy={(cy) => {
           cyRef.current = cy;
