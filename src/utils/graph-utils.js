@@ -2,7 +2,8 @@
 
 function calculatePosition(person, data) {
     const sectorAngle = data.layout.sector_distribution[person.sector] || 0;
-    const circleRadius = data.layout.circle_radius[person.circle] || 100;
+    const circleRadiusMap = (data.layout.positioning_rules && data.layout.positioning_rules.circle_radius) || data.layout.circle_radius || {};
+    const circleRadius = circleRadiusMap[person.circle] || 100;
 
     const peopleInSector = data.people.filter(p => p.sector === person.sector && p.circle === person.circle);
     const idx = peopleInSector.findIndex(p => p.name === person.name);
@@ -27,7 +28,10 @@ function calculatePosition(person, data) {
 }
 
 export const processGraphDataForCytoscape = (data) => {
-    if (!data || !data.layout || !data.people || !data.layout.sector_distribution || !data.layout.circle_radius) {
+    const circleRadiusMap = data && data.layout && data.layout.positioning_rules && data.layout.positioning_rules.circle_radius
+        ? data.layout.positioning_rules.circle_radius
+        : data && data.layout && data.layout.circle_radius;
+    if (!data || !data.layout || !data.people || !data.layout.sector_distribution || !circleRadiusMap) {
         return [];
     }
 
@@ -42,7 +46,7 @@ export const processGraphDataForCytoscape = (data) => {
 
     const sectorEntries = Object.entries(data.layout.sector_distribution);
     const sectorAngles = sectorEntries.map(([_, angle]) => angle);
-    const maxRadius = Math.max(...Object.values(data.layout.circle_radius));
+    const maxRadius = Math.max(...Object.values(circleRadiusMap));
 
     if (data.display.show_sector_labels) {
         sectorEntries.forEach(([sectorName, angle], idx) => {
@@ -132,7 +136,7 @@ export const processGraphDataForCytoscape = (data) => {
     }
 
     if (data.display.show_circles) {
-        Object.values(data.layout.circle_radius).forEach((radius, index) => {
+        Object.values(circleRadiusMap).forEach((radius, index) => {
             const points = 64;
             const guideNodeIds = [];
             for (let i = 0; i < points; i++) {
