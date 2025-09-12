@@ -1,14 +1,5 @@
 // src/utils/graph-utils.js
 
-function hashToUnit(name) {
-    let h = 2166136261 >>> 0; // FNV-1a
-    for (let i = 0; i < name.length; i++) {
-        h ^= name.charCodeAt(i);
-        h = Math.imul(h, 16777619);
-    }
-    return (h >>> 0) / 4294967295; // [0,1)
-}
-
 function calculatePosition(person, data) {
     const defaultSectorAngle = data.layout.sector_distribution[person.sector] || 0;
     const circleRadiusMap = (data.layout.positioning_rules && data.layout.positioning_rules.circle_radius) || data.layout.circle_radius || {};
@@ -26,14 +17,12 @@ function calculatePosition(person, data) {
     // Determine base circle radius and dynamically expand it to avoid overlaps
     const sharedRadius = data._computed?.circleRadii?.[person.sector]?.[person.circle];
     const baseCircleRadius = sharedRadius ?? (circleRadiusMap[person.circle] || 100);
-    const pointStyles = (data && data.display && data.display.point_styles) || {};
-    const baseSize = (pointStyles[person.importance]?.size || pointStyles["normal"]?.size || 6);
-    const nodeDiameterPx = (baseSize * 4);
-    const paddingFactor = 1.4;
-    // Estimate how many nodes fit per row within sector spread
-    const perNodeAngleDegEstimate = (nodeDiameterPx * paddingFactor) / (baseCircleRadius * 0.7) * (180 / Math.PI);
-    const maxPerRow = Math.max(1, Math.floor(sectorSpreadDeg / Math.max(perNodeAngleDegEstimate, 1e-3)));
-    const rows = Math.max(1, Math.ceil(total / maxPerRow));
+    // Use pre-computed layout grid
+    const layout = data._computed?.sectorLayouts?.[person.sector] || {};
+    const {
+        rows = 1,
+        maxPerRow = Math.max(1, total)
+    } = layout;
 
     // Compute this node's row and column
     const rowIndex = Math.floor(idx / maxPerRow);
@@ -82,7 +71,7 @@ export const processGraphDataForCytoscape = (data) => {
     // Compute dynamic per-sector centers and spreads so nodes fit inside wedges
     const sectorEntries = Object.entries(data.layout.sector_distribution)
         .sort((a, b) => a[1] - b[1]);
-    const sectorAngles = sectorEntries.map(([_, angle]) => angle);
+    const sectorAngles = sectorEntries.map(entry => entry[1]);
 
     const pointStyles = (data && data.display && data.display.point_styles) || {};
     const defaultSize = (pointStyles["normal"]?.size || 6);
@@ -96,7 +85,7 @@ export const processGraphDataForCytoscape = (data) => {
         peopleBySector.get(p.sector).push(p);
     });
 
-    const computed = { sectorCenters: {}, sectorSpreads: {}, circleRadii: {} };
+    const computed = { sectorCenters: {}, sectorSpreads: {}, circleRadii: {}, sectorLayouts: {} };
 
     sectorEntries.forEach(([sectorName, startAngle], idx) => {
         const nextIdx = (idx + 1) % sectorAngles.length;
@@ -119,9 +108,6 @@ export const processGraphDataForCytoscape = (data) => {
         const baseCircleRadius = circleRadiusMap[1] || 100;
         const nodeRadius = baseCircleRadius * 0.7;
 
-        const perNodeAngleDeg = (nodeDiameterPx * paddingFactorBetweenNodes) / nodeRadius * (180 / Math.PI);
-        const requiredSpreadDeg = Math.max(minSectorSpreadDeg, count * perNodeAngleDeg);
-
         const availableSpreadDeg = Math.max(0, wedgeSize - boundaryMarginDeg * 2);
         // Use as much of the wedge as possible for readability
         const finalSpreadDeg = Math.max(minSectorSpreadDeg, Math.min(availableSpreadDeg, 180));
@@ -140,6 +126,12 @@ export const processGraphDataForCytoscape = (data) => {
         if (!computed.circleRadii[sectorName]) computed.circleRadii[sectorName] = {};
         // Currently only circle 1 used, but support arbitrary circles
         computed.circleRadii[sectorName][1] = dynamicCircleRadius;
+
+        // Pre-calculate layout grid based on the max-sized node
+        const perNodeAngleDegEstimate = (nodeDiameterPx * paddingFactorBetweenNodes) / (dynamicCircleRadius * 0.7) * (180 / Math.PI);
+        const maxPerRow = Math.max(1, Math.floor(finalSpreadDeg / Math.max(perNodeAngleDegEstimate, 1e-3)));
+        const rows = Math.max(1, Math.ceil(count / maxPerRow));
+        computed.sectorLayouts[sectorName] = { rows, maxPerRow };
     });
 
     // attach computed to data for downstream usage
