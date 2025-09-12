@@ -1,0 +1,131 @@
+# Personal social graph data (LOCAL, do not commit)
+# Copy of public/graph.yml structure for your private data
+# Replace values below with your own. Keep YAML structure intact.
+
+center: "Alex"
+
+people:
+  - name: "Jordan"
+    sector: SectorC
+    circle: 1
+    importance: normal
+    strength: normal
+    direction: mutual
+    quality: positive
+    color_group: blue
+  - name: "Casey"
+    sector: SectorC
+    circle: 1
+    importance: normal
+    strength: normal
+    direction: mutual
+    quality: positive
+    color_group: blue
+  - name: "Morgan"
+    sector: SectorC
+    circle: 1
+    importance: normal
+    strength: normal
+    direction: mutual
+    quality: positive
+    color_group: blue
+  - name: "Taylor"
+    sector: SectorC
+    circle: 1
+    importance: normal
+    strength: normal
+    direction: mutual
+    quality: positive
+    color_group: blue
+  - name: "Riley"
+    sector: SectorC
+    circle: 1
+    importance: important
+    strength: normal
+    direction: mutual
+    quality: positive
+    color_group: blue
+  - name: "Quinn"
+    sector: SectorC
+    circle: 1
+    importance: important
+    strength: normal
+    direction: mutual
+    quality: positive
+    color_group: blue
+  - name: "Avery"
+    sector: SectorB
+    circle: 1
+    importance: normal
+    strength: normal
+    direction: mutual
+    quality: positive
+    color_group: red
+  - name: "Parker"
+    sector: SectorB
+    circle: 1
+    importance: normal
+    strength: normal
+    direction: mutual
+    quality: positive
+    color_group: red
+  - name: "Skyler"
+    sector: SectorA
+    circle: 1
+    importance: normal
+    strength: normal
+    direction: mutual
+    quality: positive
+    color_group: green
+
+peer_connections:
+  # - from: ""
+  #   to: ""
+  #   strength: normal
+  #   direction: mutual
+  #   quality: positive
+  #   color_group: blue
+
+layout:
+  sector_distribution:
+    SectorA: 90
+    SectorB: 210
+    SectorC: 330
+
+  positioning_rules:
+    sort_by: ["circle", "importance", "name"]
+    angle_spread: 160 # Increased for Madrid readability
+    circle_radius:
+      1: 180 # Increased for Madrid sector
+      2: 260
+      3: 340
+
+display:
+  show_sector_labels: true
+  show_circles: true
+  line_styles:
+    strong:
+      width: 3
+      style: solid
+    normal:
+      width: 2
+      style: solid
+    weak:
+      width: 1
+      style: dashed
+  point_styles:
+    important:
+      size: 9
+      style: filled
+    normal:
+      size: 5
+      style: filled
+  colors:
+    red: "#FF6B6B"
+    blue: "#4ECDC4"
+    green: "#2ECC71"
+    yellow: "#96CEB4"
+    purple: "#FFEAA7"
+    orange: "#DDA0DD"
+
+

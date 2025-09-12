@@ -1,25 +1,67 @@
 // src/utils/graph-utils.js
 
+function hashToUnit(name) {
+    let h = 2166136261 >>> 0; // FNV-1a
+    for (let i = 0; i < name.length; i++) {
+        h ^= name.charCodeAt(i);
+        h = Math.imul(h, 16777619);
+    }
+    return (h >>> 0) / 4294967295; // [0,1)
+}
+
 function calculatePosition(person, data) {
-    const sectorAngle = data.layout.sector_distribution[person.sector] || 0;
+    const defaultSectorAngle = data.layout.sector_distribution[person.sector] || 0;
     const circleRadiusMap = (data.layout.positioning_rules && data.layout.positioning_rules.circle_radius) || data.layout.circle_radius || {};
-    const circleRadius = circleRadiusMap[person.circle] || 100;
 
     const peopleInSector = data.people.filter(p => p.sector === person.sector && p.circle === person.circle);
     const idx = peopleInSector.findIndex(p => p.name === person.name);
-    const total = peopleInSector.length;
+    const total = Math.max(peopleInSector.length, 1);
 
-    const sectorSpread = data.layout.positioning_rules.angle_spread || 70; // Use from YAML
-    let angleOffset = 0;
-    if (total > 1) {
-        angleOffset = ((idx + 1) - (total + 1) / 2) * (sectorSpread / (total));
-    } else {
-        angleOffset = sectorSpread / 4;
+    // Prefer dynamic per-sector spread/center if computed
+    const dynamicSpread = data._computed?.sectorSpreads?.[person.sector];
+    const dynamicCenter = data._computed?.sectorCenters?.[person.sector];
+    const sectorSpreadDeg = dynamicSpread ?? (data.layout.positioning_rules.angle_spread || 70);
+    const sectorCenterDeg = dynamicCenter ?? defaultSectorAngle;
+
+    // Determine base circle radius and dynamically expand it to avoid overlaps
+    const sharedRadius = data._computed?.circleRadii?.[person.sector]?.[person.circle];
+    const baseCircleRadius = sharedRadius ?? (circleRadiusMap[person.circle] || 100);
+    const pointStyles = (data && data.display && data.display.point_styles) || {};
+    const baseSize = (pointStyles[person.importance]?.size || pointStyles["normal"]?.size || 6);
+    const nodeDiameterPx = (baseSize * 4);
+    const paddingFactor = 1.4;
+    // Estimate how many nodes fit per row within sector spread
+    const perNodeAngleDegEstimate = (nodeDiameterPx * paddingFactor) / (baseCircleRadius * 0.7) * (180 / Math.PI);
+    const maxPerRow = Math.max(1, Math.floor(sectorSpreadDeg / Math.max(perNodeAngleDegEstimate, 1e-3)));
+    const rows = Math.max(1, Math.ceil(total / maxPerRow));
+
+    // Compute this node's row and column
+    const rowIndex = Math.floor(idx / maxPerRow);
+    const isLastRow = rowIndex === (rows - 1);
+    const itemsBeforeLastRow = (rows - 1) * maxPerRow;
+    const colsInRow = isLastRow ? (total - itemsBeforeLastRow) : maxPerRow;
+    let colIndex = idx - rowIndex * maxPerRow; // 0..colsInRow-1 (last row may be shorter)
+    // Snake ordering: reverse direction on every other row for better label spacing
+    if (rowIndex % 2 === 1) {
+        colIndex = (colsInRow - 1) - Math.min(colIndex, colsInRow - 1);
     }
 
-    const angle = sectorAngle + angleOffset;
+    // Angle placement for this row
+    const innerMarginDeg = 3;
+    const halfSpread = Math.max(0, (sectorSpreadDeg / 2) - innerMarginDeg);
+    const angleInRow = -halfSpread + (2 * halfSpread) * ((colIndex + 0.5) / colsInRow);
+    const angle = sectorCenterDeg + angleInRow;
     const angleRad = angle * Math.PI / 180;
-    const nodeRadius = circleRadius * 0.7;
+    let nodeRadius = baseCircleRadius * 0.7;
+
+    // Radial placement for rows: spread within [0.6, 0.85] of circle radius
+    if (rows > 1) {
+        const minFactor = 0.6;
+        const maxFactor = 0.85;
+        const t = rows === 1 ? 0.5 : (rowIndex / (rows - 1));
+        const factor = minFactor + (maxFactor - minFactor) * t;
+        nodeRadius = baseCircleRadius * factor;
+    }
 
     return {
         x: Math.cos(angleRad) * nodeRadius,
@@ -37,6 +79,72 @@ export const processGraphDataForCytoscape = (data) => {
 
     const elements = [];
 
+    // Compute dynamic per-sector centers and spreads so nodes fit inside wedges
+    const sectorEntries = Object.entries(data.layout.sector_distribution)
+        .sort((a, b) => a[1] - b[1]);
+    const sectorAngles = sectorEntries.map(([_, angle]) => angle);
+
+    const pointStyles = (data && data.display && data.display.point_styles) || {};
+    const defaultSize = (pointStyles["normal"]?.size || 6);
+    const paddingFactorBetweenNodes = 1.4;
+    const boundaryMarginDeg = 10; // visual margin from sector lines
+    const minSectorSpreadDeg = 70;
+
+    const peopleBySector = new Map();
+    data.people.forEach(p => {
+        if (!peopleBySector.has(p.sector)) peopleBySector.set(p.sector, []);
+        peopleBySector.get(p.sector).push(p);
+    });
+
+    const computed = { sectorCenters: {}, sectorSpreads: {}, circleRadii: {} };
+
+    sectorEntries.forEach(([sectorName, startAngle], idx) => {
+        const nextIdx = (idx + 1) % sectorAngles.length;
+        let endAngle = sectorAngles[nextIdx];
+        if (endAngle <= startAngle) endAngle += 360;
+        const wedgeSize = endAngle - startAngle; // full sector gap between boundary rays
+
+        const sectorPeople = peopleBySector.get(sectorName) || [];
+        const count = Math.max(sectorPeople.length, 1);
+
+        // Estimate node diameter to space items
+        let maxSize = defaultSize;
+        sectorPeople.forEach(p => {
+            const s = pointStyles[p.importance]?.size || defaultSize;
+            if (s > maxSize) maxSize = s;
+        });
+        const nodeDiameterPx = maxSize * 4;
+
+        // Use circle 1 baseline radius for spacing estimate
+        const baseCircleRadius = circleRadiusMap[1] || 100;
+        const nodeRadius = baseCircleRadius * 0.7;
+
+        const perNodeAngleDeg = (nodeDiameterPx * paddingFactorBetweenNodes) / nodeRadius * (180 / Math.PI);
+        const requiredSpreadDeg = Math.max(minSectorSpreadDeg, count * perNodeAngleDeg);
+
+        const availableSpreadDeg = Math.max(0, wedgeSize - boundaryMarginDeg * 2);
+        // Use as much of the wedge as possible for readability
+        const finalSpreadDeg = Math.max(minSectorSpreadDeg, Math.min(availableSpreadDeg, 180));
+
+        // Compute a shared dynamic radius so that count nodes of diameter fit into available spread
+        const perNodeAvailableDeg = (finalSpreadDeg / count);
+        const requiredNodeRadius = perNodeAvailableDeg > 0
+            ? ((nodeDiameterPx * paddingFactorBetweenNodes) / (perNodeAvailableDeg * Math.PI / 180))
+            : nodeRadius;
+        const dynamicCircleRadius = Math.max(baseCircleRadius, requiredNodeRadius / 0.7);
+
+        const centerAngle = startAngle + (wedgeSize / 2);
+
+        computed.sectorCenters[sectorName] = centerAngle % 360;
+        computed.sectorSpreads[sectorName] = finalSpreadDeg;
+        if (!computed.circleRadii[sectorName]) computed.circleRadii[sectorName] = {};
+        // Currently only circle 1 used, but support arbitrary circles
+        computed.circleRadii[sectorName][1] = dynamicCircleRadius;
+    });
+
+    // attach computed to data for downstream usage
+    data._computed = computed;
+
     if (data.center) {
         elements.push({
             data: { id: data.center, name: data.center, type: 'center' },
@@ -44,9 +152,25 @@ export const processGraphDataForCytoscape = (data) => {
         });
     }
 
-    const sectorEntries = Object.entries(data.layout.sector_distribution);
-    const sectorAngles = sectorEntries.map(([_, angle]) => angle);
-    const maxRadius = Math.max(...Object.values(circleRadiusMap));
+    // sectorEntries and sectorAngles already computed above
+    // Determine visible radii for guide circles: prefer computed dynamic radii
+    const dynamicRadiiMap = (() => {
+        const result = { ...circleRadiusMap };
+        if (data._computed && data._computed.circleRadii) {
+            // For each circle index, take the max across sectors to ensure guides enclose all nodes
+            const perCircle = {};
+            Object.values(data._computed.circleRadii).forEach(perSector => {
+                Object.entries(perSector).forEach(([circleKey, radius]) => {
+                    const key = String(circleKey);
+                    perCircle[key] = Math.max(perCircle[key] || 0, radius);
+                });
+            });
+            Object.entries(perCircle).forEach(([k, v]) => { result[k] = v; });
+        }
+        return result;
+    })();
+
+    const maxRadius = Math.max(...Object.values(dynamicRadiiMap));
 
     if (data.display.show_sector_labels) {
         sectorEntries.forEach(([sectorName, angle], idx) => {
@@ -127,7 +251,7 @@ export const processGraphDataForCytoscape = (data) => {
     }
 
     if (data.display.show_circles) {
-        Object.values(circleRadiusMap).forEach((radius, index) => {
+        Object.values(dynamicRadiiMap).forEach((radius, index) => {
             const points = 64;
             const guideNodeIds = [];
             for (let i = 0; i < points; i++) {
