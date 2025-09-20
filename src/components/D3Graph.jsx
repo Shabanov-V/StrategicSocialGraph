@@ -27,7 +27,7 @@ const D3Graph = ({ graphData }) => {
         const circles = g.append("g")
             .attr("class", "circles");
         
-        const maxRadius = Math.min(width, height) * 0.4;
+        const maxRadius = Math.min(width, height) * 1.2; // Increased from 0.4 to 1.2 (3x larger)
         const circleRadii = [
             maxRadius * 0.33,  // Inner circle
             maxRadius * 0.66,  // Middle circle
