@@ -23,6 +23,77 @@ const D3Graph = ({ graphData }) => {
 
         const g = svg.append("g");
 
+        // Add circles for different levels
+        const circles = g.append("g")
+            .attr("class", "circles");
+        
+        const maxRadius = Math.min(width, height) * 0.4;
+        const circleRadii = [
+            maxRadius * 0.33,  // Inner circle
+            maxRadius * 0.66,  // Middle circle
+            maxRadius         // Outer circle
+        ];
+
+        // Create exactly 3 circles
+        circleRadii.forEach((radius, i) => {
+            circles.append("circle")
+                .attr("cx", width / 2)
+                .attr("cy", height / 2)
+                .attr("r", radius)
+                .attr("fill", "none")
+                .attr("stroke", "#ccc")
+                .attr("stroke-width", 2)
+                .attr("stroke-dasharray", "5,5")
+                .attr("class", `circle-${i + 1}`);
+        });
+
+        // Add sector dividers
+        const sectors = g.append("g")
+            .attr("class", "sectors");
+        
+        const sortedSectors = Object.entries(graphData.layout.sector_distribution)
+            .map(([name, angle]) => ({ name, angle }))
+            .sort((a, b) => a.angle - b.angle);
+
+        // Draw sector lines
+        sortedSectors.forEach(sector => {
+            const angle = sector.angle * (Math.PI / 180);
+            sectors.append("line")
+                .attr("x1", width / 2)
+                .attr("y1", height / 2)
+                .attr("x2", width / 2 + Math.cos(angle) * maxRadius)
+                .attr("y2", height / 2 + Math.sin(angle) * maxRadius)
+                .attr("stroke", "#999")
+                .attr("stroke-width", 2.5)
+                .attr("stroke-dasharray", "10,5");
+        });
+
+        // Add sector labels in the middle of each sector
+        sortedSectors.forEach((sector, i) => {
+            const nextSector = sortedSectors[(i + 1) % sortedSectors.length];
+            let startAngle = sector.angle;
+            let endAngle = nextSector.angle;
+            
+            // Handle wrap-around case
+            if (endAngle <= startAngle) {
+                endAngle += 360;
+            }
+            
+            // Calculate middle angle of the sector
+            const midAngle = ((startAngle + endAngle) / 2) * (Math.PI / 180);
+            const labelRadius = maxRadius * 1.2; // Position at 120% of the max radius
+            
+            sectors.append("text")
+                .attr("x", width / 2 + Math.cos(midAngle) * labelRadius)
+                .attr("y", height / 2 + Math.sin(midAngle) * labelRadius)
+                .attr("text-anchor", "middle")
+                .attr("dominant-baseline", "middle")
+                .attr("fill", "#666")
+                .attr("font-size", "12px")
+                .attr("class", "sector-label")
+                .text(sector.name);
+        });
+
         const link = g.append("g")
             .attr("class", "links")
             .selectAll("line")
