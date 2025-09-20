@@ -1,16 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import yaml from 'js-yaml';
 import Editor from './components/Editor';
-import GraphCanvas from './components/GraphCanvas';
+import D3Graph from './components/D3Graph.jsx';
 import Layout from './components/Layout';
-import { processGraphDataForCytoscape } from './utils/graph-helper';
 import styles from './App.module.css';
 import './App.css';
 
 function App() {
   const [yamlText, setYamlText] = useState('');
   const [graphData, setGraphData] = useState(null);
-  const [cytoscapeElements, setCytoscapeElements] = useState([]);
   const [yamlError, setYamlError] = useState(null);
   const STORAGE_KEY = 'graphYaml';
 
@@ -21,7 +19,7 @@ function App() {
         setYamlText(cached);
         return;
       }
-    } catch (e) {
+    } catch (_e) {
       // If localStorage is unavailable, fall back to fetch
     }
 
@@ -34,7 +32,7 @@ function App() {
         setYamlText(text);
         try {
           localStorage.setItem(STORAGE_KEY, text);
-        } catch (e) {
+        } catch (_e) {
           // Ignore storage errors
         }
       })
@@ -49,8 +47,6 @@ function App() {
     try {
       const data = yaml.load(yamlText);
       setGraphData(data);
-      const elements = processGraphDataForCytoscape(data);
-      setCytoscapeElements(elements);
       setYamlError(null);
     } catch (e) {
       setYamlError(e.message);
@@ -62,7 +58,7 @@ function App() {
     if (!yamlText || yamlText.trim().length === 0) return;
     try {
       localStorage.setItem(STORAGE_KEY, yamlText);
-    } catch (e) {
+    } catch (_e) {
       // Ignore storage errors
     }
   }, [yamlText]);
@@ -86,7 +82,7 @@ function App() {
       <h1 className={styles.title}>Диаграмма социальных связей</h1>
       <Layout
         left={editorPanel}
-        right={<GraphCanvas elements={cytoscapeElements} graphData={graphData} />}
+        right={<D3Graph graphData={graphData} />}
       />
     </div>
   );
