@@ -5,6 +5,7 @@ import D3Graph from './components/D3Graph.jsx';
 import Layout from './components/Layout';
 import styles from './App.module.css';
 import './App.css';
+import { calculateSectorAngles } from './utils/layout-helper.js';
 
 function App() {
   const [yamlText, setYamlText] = useState('');
@@ -46,7 +47,7 @@ function App() {
     if (!yamlText) return;
     try {
       const data = yaml.load(yamlText);
-      setGraphData(data);
+      setGraphData(calculateSectorAngles(data));
       setYamlError(null);
     } catch (e) {
       setYamlError(e.message);

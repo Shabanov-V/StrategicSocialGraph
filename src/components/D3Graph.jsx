@@ -47,51 +47,73 @@ const D3Graph = ({ graphData }) => {
                 .attr("class", `circle-${i + 1}`);
         });
 
-        // Add sector dividers
+        // Add sectors
         const sectors = g.append("g")
             .attr("class", "sectors");
-        
-        const sortedSectors = Object.entries(graphData.layout.sector_distribution)
-            .map(([name, angle]) => ({ name, angle }))
-            .sort((a, b) => a.angle - b.angle);
 
-        // Draw sector lines
-        sortedSectors.forEach(sector => {
-            const angle = sector.angle * (Math.PI / 180);
-            sectors.append("line")
-                .attr("x1", width / 2)
-                .attr("y1", height / 2)
-                .attr("x2", width / 2 + Math.cos(angle) * maxRadius)
-                .attr("y2", height / 2 + Math.sin(angle) * maxRadius)
+        // Create arc generator for sectors
+        const arcGenerator = d3.arc()
+            .innerRadius(0)
+            .outerRadius(maxRadius);
+
+        // Draw sector boundaries and backgrounds
+        graphData.sectors.forEach(sector => {
+            // Convert angles to radians
+            const startAngle = sector.startAngle * (Math.PI / 180);
+            const endAngle = sector.endAngle * (Math.PI / 180);
+
+            // Draw sector background with very light fill
+            sectors.append("path")
+                .attr("d", arcGenerator({
+                    startAngle,
+                    endAngle
+                }))
+                .attr("transform", `translate(${width/2},${height/2})`)
+                .attr("fill", "#f8f8f8")
+                .attr("stroke", "none")
+                .attr("opacity", 0.3);
+
+            // Draw sector boundaries
+            sectors.append("path")
+                .attr("d", arcGenerator({
+                    startAngle,
+                    endAngle: startAngle
+                }))
+                .attr("transform", `translate(${width/2},${height/2})`)
                 .attr("stroke", "#999")
-                .attr("stroke-width", 2.5)
-                .attr("stroke-dasharray", "10,5");
-        });
+                .attr("stroke-width", 2)
+                .attr("stroke-dasharray", "10,5")
+                .attr("fill", "none");
 
-        // Add sector labels in the middle of each sector
-        sortedSectors.forEach((sector, i) => {
-            const nextSector = sortedSectors[(i + 1) % sortedSectors.length];
-            let startAngle = sector.angle;
-            let endAngle = nextSector.angle;
+            // Add sector labels using centerAngle from the layout helper
+            // Convert centerAngle to radians and adjust for SVG coordinate system (-90 to start at 12 o'clock)
+            const radialAngle = (sector.centerAngle - 90) * (Math.PI / 180);
             
-            // Handle wrap-around case
-            if (endAngle <= startAngle) {
-                endAngle += 360;
-            }
+            // Position label
+            const labelRadius = maxRadius * 1.1; // Moved labels slightly inward
+            const labelX = width/2 + Math.cos(radialAngle) * labelRadius;
+            const labelY = height/2 + Math.sin(radialAngle) * labelRadius;
             
-            // Calculate middle angle of the sector
-            const midAngle = ((startAngle + endAngle) / 2) * (Math.PI / 180);
-            const labelRadius = maxRadius * 1.2; // Position at 120% of the max radius
-            
+            // Add sector name
             sectors.append("text")
-                .attr("x", width / 2 + Math.cos(midAngle) * labelRadius)
-                .attr("y", height / 2 + Math.sin(midAngle) * labelRadius)
+                .attr("x", labelX)
+                .attr("y", labelY)
                 .attr("text-anchor", "middle")
                 .attr("dominant-baseline", "middle")
                 .attr("fill", "#666")
-                .attr("font-size", "12px")
+                .attr("font-size", "14px")
                 .attr("class", "sector-label")
                 .text(sector.name);
+                
+            // Add people count below sector name
+            sectors.append("text")
+                .attr("x", labelX)
+                .attr("y", labelY + 20)
+                .attr("text-anchor", "middle")
+                .attr("dominant-baseline", "middle")
+                .attr("fill", "#999")
+                .attr("font-size", "12px")
+                .text(`(${sector.peopleCount})`);
         });
 
         const link = g.append("g")
