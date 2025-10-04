@@ -105,19 +105,6 @@ export const createSimulation = (nodes, links, { width, height, data, maxRadius,
         centerNode.fy = centerY;
     }
 
-    // Add custom positioning force using calculated sector angles
-    simulation.force("position", alpha => {
-        nodes.forEach(node => {
-            if (node.type === 'center' || !node.sectorAngle) return;
-
-            // Convert target angle to radians (adjust for SVG coordinate system)
-            const targetAngle = ((node.sectorAngle - 90) * Math.PI) / 180;
-            
-            node.vx += Math.cos(targetAngle) * alpha * 2;
-            node.vy += Math.sin(targetAngle) * alpha * 2;
-        });
-    });
-
     // Add sector boundary constraint force (runs last to override other forces)
     simulation.force("sectorBoundary", () => {
         nodes.forEach(node => {
@@ -208,7 +195,11 @@ export const createSimulation = (nodes, links, { width, height, data, maxRadius,
     // Set initial positions based on calculated sector angles
     nodes.forEach(node => {
         if (node.type !== 'center') {
-            const radius = circleRadii[node.circle] || circleRadii[3];
+            // Calculate the middle of the circle range for initial positioning
+            const minRadius = node.circle === 1 ? 0 : circleRadii[node.circle - 1];
+            const maxRadius = circleRadii[node.circle - 1];
+            const radius = (minRadius + maxRadius) / 2; // Place in the middle of the range
+            
             // Convert sectorAngle from degrees to radians and adjust for SVG coordinate system
             const angle = ((node.sectorAngle - 90) * Math.PI) / 180;
             node.x = centerX + Math.cos(angle) * radius;
