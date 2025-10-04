@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import * as d3 from 'd3';
-import { processGraphDataForD3, createSimulation, getD3Style } from '../utils/d3-helper';
+import { processGraphDataForD3, createSimulation, getD3Style, constrainToSector } from '../utils/d3-helper';
 
 const D3Graph = ({ graphData }) => {
     const svgRef = useRef(null);
@@ -11,8 +11,18 @@ const D3Graph = ({ graphData }) => {
         if (!graphData || !svgRef.current || !containerRef.current) return;
 
         const { width, height } = containerRef.current.getBoundingClientRect();
+        const centerX = width / 2;
+        const centerY = height / 2;
+        
+        const maxRadius = Math.min(width, height) * 1.2;
+        const circleRadii = [
+            maxRadius * 0.33,  // Circle 1 max radius
+            maxRadius * 0.66,  // Circle 2 max radius
+            maxRadius          // Circle 3 max radius
+        ];
+
         const { nodes, links } = processGraphDataForD3(graphData, { width, height });
-        const simulation = createSimulation(nodes, links, { width, height, data: graphData });
+        const simulation = createSimulation(nodes, links, { width, height, data: graphData, circleRadii, maxRadius });
         const style = getD3Style(graphData);
 
         const svg = d3.select(svgRef.current)
@@ -27,14 +37,7 @@ const D3Graph = ({ graphData }) => {
         const circles = g.append("g")
             .attr("class", "circles");
         
-        const maxRadius = Math.min(width, height) * 1.2; // Increased from 0.4 to 1.2 (3x larger)
-        const circleRadii = [
-            maxRadius * 0.33,  // Inner circle
-            maxRadius * 0.66,  // Middle circle
-            maxRadius         // Outer circle
-        ];
 
-        // Create exactly 3 circles
         circleRadii.forEach((radius, i) => {
             circles.append("circle")
                 .attr("cx", width / 2)
@@ -51,18 +54,14 @@ const D3Graph = ({ graphData }) => {
         const sectors = g.append("g")
             .attr("class", "sectors");
 
-        // Create arc generator for sectors
         const arcGenerator = d3.arc()
             .innerRadius(0)
             .outerRadius(maxRadius);
 
-        // Draw sector boundaries and backgrounds
         graphData.sectors.forEach(sector => {
-            // Convert angles to radians
             const startAngle = sector.startAngle * (Math.PI / 180);
             const endAngle = sector.endAngle * (Math.PI / 180);
 
-            // Draw sector background with very light fill
             sectors.append("path")
                 .attr("d", arcGenerator({
                     startAngle,
@@ -73,28 +72,22 @@ const D3Graph = ({ graphData }) => {
                 .attr("stroke", "none")
                 .attr("opacity", 0.3);
 
-            // Draw sector boundaries
+            // Draw sector boundaries with solid lines to emphasize they're walls
             sectors.append("path")
                 .attr("d", arcGenerator({
                     startAngle,
                     endAngle: startAngle
                 }))
                 .attr("transform", `translate(${width/2},${height/2})`)
-                .attr("stroke", "#999")
+                .attr("stroke", "#666")
                 .attr("stroke-width", 2)
-                .attr("stroke-dasharray", "10,5")
                 .attr("fill", "none");
 
-            // Add sector labels using centerAngle from the layout helper
-            // Convert centerAngle to radians and adjust for SVG coordinate system (-90 to start at 12 o'clock)
             const radialAngle = (sector.centerAngle - 90) * (Math.PI / 180);
-            
-            // Position label
-            const labelRadius = maxRadius * 1.1; // Moved labels slightly inward
+            const labelRadius = maxRadius * 1.1;
             const labelX = width/2 + Math.cos(radialAngle) * labelRadius;
             const labelY = height/2 + Math.sin(radialAngle) * labelRadius;
             
-            // Add sector name
             sectors.append("text")
                 .attr("x", labelX)
                 .attr("y", labelY)
@@ -105,7 +98,6 @@ const D3Graph = ({ graphData }) => {
                 .attr("class", "sector-label")
                 .text(sector.name);
                 
-            // Add people count below sector name
             sectors.append("text")
                 .attr("x", labelX)
                 .attr("y", labelY + 20)
@@ -132,7 +124,7 @@ const D3Graph = ({ graphData }) => {
             .enter().append("circle")
             .attr("r", d => style.node(d).radius)
             .attr("fill", d => style.node(d).fill)
-            .call(drag(simulation))
+            .call(drag(simulation, centerX, centerY))
             .on("click", (event, d) => {
                 let info = `<strong>${d.name}</strong><br>`;
                 if (d.type === 'center') {
@@ -171,7 +163,7 @@ const D3Graph = ({ graphData }) => {
                 .attr("transform", d => `translate(${d.x},${d.y})`);
         });
 
-        function drag(simulation) {
+        function drag(simulation, centerX, centerY) {
             function dragstarted(event, d) {
                 if (!event.active) simulation.alphaTarget(0.3).restart();
                 d.fx = d.x;
@@ -179,15 +171,17 @@ const D3Graph = ({ graphData }) => {
             }
 
             function dragged(event, d) {
-                d.fx = event.x;
-                d.fy = event.y;
+                // Constrain the drag position to sector and circle boundaries
+                const constrained = constrainToSector(event.x, event.y, d, centerX, centerY, circleRadii);
+                d.fx = constrained.x;
+                d.fy = constrained.y;
             }
 
-            function dragended(event, _d) {
+            function dragended(event, d) {
                 if (!event.active) simulation.alphaTarget(0);
-                // Keep node fixed at the dragged position
-                // _d.fx = null;
-                // _d.fy = null;
+                // Release fixed position so node can be affected by forces again
+                d.fx = null;
+                d.fy = null;
             }
 
             return d3.drag()
