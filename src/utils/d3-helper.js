@@ -125,8 +125,8 @@ export const createSimulation = (nodes, links, { width, height, data, maxRadius,
 
             // Hard constrain distance to circle boundaries (no tolerance)
             if (node.circle !== undefined) {
-                const minRadius = node.circle === 1 ? 0 : circleRadii[node.circle];
-                const maxRadius = circleRadii[node.circle];
+                const minRadius = node.circle === 1 ? 0 : circleRadii[node.circle - 2];
+                const maxRadius = circleRadii[node.circle - 1];
                 
                 if (distance < minRadius) {
                     correctedDistance = minRadius;
@@ -196,7 +196,7 @@ export const createSimulation = (nodes, links, { width, height, data, maxRadius,
     nodes.forEach(node => {
         if (node.type !== 'center') {
             // Calculate the middle of the circle range for initial positioning
-            const minRadius = node.circle === 1 ? 0 : circleRadii[node.circle - 1];
+            const minRadius = node.circle === 1 ? 0 : circleRadii[node.circle - 2];
             const maxRadius = circleRadii[node.circle - 1];
             const radius = (minRadius + maxRadius) / 2; // Place in the middle of the range
             
