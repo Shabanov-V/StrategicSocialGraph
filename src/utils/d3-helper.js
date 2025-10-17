@@ -24,7 +24,7 @@ export const processGraphDataForD3 = (data, { width, height }) => {
     
     data.people.forEach(person => {
         if (person.name !== data.center) {
-            const nodeData = { id: person.name, type: 'person', ...person };
+            const nodeData = { id: person.id, type: 'person', ...person };
             
             // Add sector boundary information to each node
             if (person.sector && sectorMap[person.sector]) {
@@ -40,11 +40,15 @@ export const processGraphDataForD3 = (data, { width, height }) => {
     if (data.peer_connections) {
         data.peer_connections.forEach(conn => {
             if (conn.from && conn.to) {
-                links.push({ source: conn.from, target: conn.to, ...conn });
+                // Find the actual node objects for source and target
+                const sourceNode = nodes.find(n => n.id === conn.from);
+                const targetNode = nodes.find(n => n.id === conn.to);
+                if (sourceNode && targetNode) {
+                    links.push({ source: sourceNode, target: targetNode, ...conn });
+                }
             }
         });
     }
-
     return { nodes, links };
 };
 
@@ -86,6 +90,14 @@ const getNearestBoundary = (currentAngle, startAngle, endAngle) => {
     return distToStart < distToEnd ? startAngle : endAngle;
 };
 
+const calculateLinkDistance = (maxRadius, link) => {
+    return Math.abs(link.source.circle - link.target.circle) * 0.3 * maxRadius * 0.8 + 50;
+}
+
+const calculateLinkStrength = (data, link) => {
+    return data.display?.line_styles?.[link.strength]?.width * 0.1;
+}
+
 export const createSimulation = (nodes, links, { width, height, data, maxRadius, circleRadii }) => {
 
     const centerX = width / 2;
@@ -95,8 +107,12 @@ export const createSimulation = (nodes, links, { width, height, data, maxRadius,
     const simulation = d3.forceSimulation(nodes)
         .force("charge", d3.forceManyBody()
             .strength(-30)
-            .distanceMax(maxRadius * 10))
-        .force("collide", d3.forceCollide().radius(10));
+            .distanceMax(maxRadius * 0.1))
+        .force("collide", d3.forceCollide().radius(10))
+        .force("link", d3.forceLink(links)
+            .id(d => d.id)
+            .distance(link => calculateLinkDistance(maxRadius, link))
+            .strength(link => calculateLinkStrength(data, link)));
 
     // Fix the center node
     const centerNode = nodes.find(n => n.type === 'center');

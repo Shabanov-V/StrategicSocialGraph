@@ -1,126 +1,447 @@
-# Social Network Diagram Format - валидный YAML
-
-center: "Иван"
-
+center: "Alex"
 people:
-  - name: "Мария"
-    sector: family
+  # Family - Inner circle
+  - id: 1
+    name: "Mom"
+    sector: Family
     circle: 1
     importance: important
-    strength: strong      # strong|normal|weak - интенсивность связи с центром
-    direction: mutual     # mutual|outgoing|incoming - направление инициативы
-    quality: positive     # positive|negative|neutral - знак отношений
-    color_group: red
-  
-  - name: "Петр"
-    sector: work
-    circle: 1
-    importance: important
-    strength: normal
-    direction: outgoing
+    strength: strong
+    direction: mutual
     quality: positive
-    color_group: blue
-  
-  - name: "Анна"
-    sector: friends
+    color_group: green
+  - id: 2
+    name: "Dad"
+    sector: Family
     circle: 1
+    importance: important
+    strength: strong
+    direction: mutual
+    quality: positive
+    color_group: green
+  - id: 3
+    name: "Sarah"
+    sector: Family
+    circle: 1
+    importance: important
+    strength: strong
+    direction: mutual
+    quality: positive
+    color_group: green
+  - id: 4
+    name: "Uncle Tom"
+    sector: Family
+    circle: 2
     importance: normal
     strength: normal
     direction: mutual
     quality: positive
     color_group: green
-  
-  - name: "Сергей"
-    sector: work
+  - id: 5
+    name: "Aunt Jenny"
+    sector: Family
     circle: 2
     importance: normal
     strength: weak
-    direction: incoming
-    quality: neutral
-    color_group: blue
+    direction: mutual
+    quality: positive
+    color_group: green
   
-  - name: "Елена"
-    sector: family
+  # Berlin - Close friends
+  - id: 6
+    name: "Emma"
+    sector: Berlin
+    circle: 1
+    importance: important
+    strength: strong
+    direction: mutual
+    quality: positive
+    color_group: blue
+  - id: 7
+    name: "Carlos"
+    sector: Berlin
+    circle: 1
+    importance: important
+    strength: strong
+    direction: mutual
+    quality: positive
+    color_group: blue
+  - id: 8
+    name: "Sophia"
+    sector: Berlin
+    circle: 1
+    importance: normal
+    strength: normal
+    direction: mutual
+    quality: positive
+    color_group: blue
+  - id: 9
+    name: "Lucas"
+    sector: Berlin
     circle: 2
     importance: normal
     strength: normal
     direction: mutual
     quality: positive
-    color_group: red
-  
-  - name: "Дмитрий"
-    sector: study
+    color_group: blue
+  - id: 10
+    name: "Nina"
+    sector: Berlin
     circle: 2
+    importance: normal
+    strength: weak
+    direction: from_center
+    quality: positive
+    color_group: blue
+  - id: 11
+    name: "Felix"
+    sector: Berlin
+    circle: 3
+    importance: normal
+    strength: weak
+    direction: mutual
+    quality: neutral
+    color_group: blue
+  
+  # Work - Professional network
+  - id: 12
+    name: "Isabella"
+    sector: Work
+    circle: 1
     importance: important
     strength: strong
     direction: mutual
     quality: positive
     color_group: yellow
-  
-  - name: "Ольга"
-    sector: hobby
+  - id: 13
+    name: "James"
+    sector: Work
+    circle: 1
+    importance: important
+    strength: normal
+    direction: mutual
+    quality: positive
+    color_group: yellow
+  - id: 14
+    name: "Maria"
+    sector: Work
+    circle: 2
+    importance: normal
+    strength: normal
+    direction: mutual
+    quality: positive
+    color_group: yellow
+  - id: 15
+    name: "David"
+    sector: Work
+    circle: 2
+    importance: normal
+    strength: normal
+    direction: mutual
+    quality: neutral
+    color_group: yellow
+  - id: 16
+    name: "Rachel"
+    sector: Work
     circle: 3
     importance: normal
     strength: weak
-    direction: outgoing
-    quality: negative
-    color_group: purple
-
-# Связи между людьми (кто кого знает)
-peer_connections:
-  - from: "Мария"
-    to: "Елена"
+    direction: from_center
+    quality: positive
+    color_group: yellow
+  - id: 17
+    name: "Kevin"
+    sector: Work
+    circle: 3
+    importance: normal
+    strength: weak
+    direction: to_center
+    quality: neutral
+    color_group: yellow
+  
+  # London - Old friends
+  - id: 18
+    name: "Marcus"
+    sector: London
+    circle: 1
+    importance: important
     strength: normal
+    direction: mutual
     quality: positive
     color_group: red
-  
-  - from: "Петр"
-    to: "Сергей"
+  - id: 19
+    name: "Olivia"
+    sector: London
+    circle: 1
+    importance: normal
     strength: normal
+    direction: mutual
+    quality: positive
+    color_group: red
+  - id: 20
+    name: "Ben"
+    sector: London
+    circle: 2
+    importance: normal
+    strength: weak
+    direction: mutual
+    quality: positive
+    color_group: red
+  - id: 21
+    name: "Chloe"
+    sector: London
+    circle: 2
+    importance: normal
+    strength: weak
+    direction: mutual
+    quality: neutral
+    color_group: red
+  
+  # Hobby - Sports/Activities
+  - id: 22
+    name: "Javier"
+    sector: Hobby
+    circle: 2
+    importance: normal
+    strength: normal
+    direction: mutual
+    quality: positive
+    color_group: purple
+  - id: 23
+    name: "Yuki"
+    sector: Hobby
+    circle: 2
+    importance: normal
+    strength: normal
+    direction: mutual
+    quality: positive
+    color_group: purple
+  - id: 24
+    name: "Ahmed"
+    sector: Hobby
+    circle: 3
+    importance: normal
+    strength: weak
+    direction: mutual
+    quality: positive
+    color_group: purple
+  - id: 25
+    name: "Lisa"
+    sector: Hobby
+    circle: 3
+    importance: normal
+    strength: weak
+    direction: from_center
+    quality: positive
+    color_group: purple
+  
+  # University - Old classmates
+  - id: 26
+    name: "Michael"
+    sector: University
+    circle: 2
+    importance: normal
+    strength: weak
+    direction: mutual
+    quality: positive
+    color_group: orange
+  - id: 27
+    name: "Anna"
+    sector: University
+    circle: 3
+    importance: normal
+    strength: weak
+    direction: mutual
+    quality: neutral
+    color_group: orange
+  - id: 28
+    name: "Thomas"
+    sector: University
+    circle: 3
+    importance: normal
+    strength: weak
+    direction: to_center
+    quality: positive
+    color_group: orange
+
+peer_connections:
+  # Family connections
+  - from: 1
+    to: 2
+    strength: strong
+    direction: mutual
+    quality: positive
+    color_group: green
+  - from: 1
+    to: 4
+    strength: normal
+    direction: mutual
+    quality: positive
+    color_group: green
+  - from: 2
+    to: 4
+    strength: normal
+    direction: mutual
+    quality: positive
+    color_group: green
+  - from: 4
+    to: 5
+    strength: strong
+    direction: mutual
+    quality: positive
+    color_group: green
+  
+  # Berlin friend group
+  - from: 6
+    to: 7
+    strength: strong
+    direction: mutual
+    quality: positive
+    color_group: blue
+  - from: 6
+    to: 8
+    strength: normal
+    direction: mutual
+    quality: positive
+    color_group: blue
+  - from: 7
+    to: 8
+    strength: strong
+    direction: mutual
+    quality: positive
+    color_group: blue
+  - from: 8
+    to: 9
+    strength: normal
+    direction: mutual
+    quality: positive
+    color_group: blue
+  - from: 9
+    to: 11
+    strength: weak
     direction: mutual
     quality: neutral
     color_group: blue
   
-  - from: "Анна"
-    to: "Дмитрий"
-    strength: weak
-    direction: incoming
+  # Work network
+  - from: 12
+    to: 13
+    strength: strong
+    direction: mutual
     quality: positive
-
-# Логика размещения для детерминированного рендеринга
-layout:
-  # Алгоритм размещения людей в секторах
-  sector_distribution:
-    family: 0        # начальный угол сектора в градусах
-    work: 60
-    friends: 120
-    study: 180
-    hobby: 240
-    other: 300
+    color_group: yellow
+  - from: 12
+    to: 14
+    strength: normal
+    direction: mutual
+    quality: positive
+    color_group: yellow
+  - from: 13
+    to: 14
+    strength: normal
+    direction: mutual
+    quality: positive
+    color_group: yellow
+  - from: 14
+    to: 15
+    strength: weak
+    direction: mutual
+    quality: neutral
+    color_group: yellow
+  - from: 15
+    to: 16
+    strength: weak
+    direction: mutual
+    quality: positive
+    color_group: yellow
   
-  # Правила для стабильного позиционирования
-  positioning_rules:
-    # Сортировка людей в каждом секторе для предсказуемости
-    sort_by: ["circle", "importance", "name"]  # по кругу, важности, затем по алфавиту
-    
-    # Распределение внутри сектора
-    angle_spread: 50  # градусы для распределения людей в секторе
-    
-    # Радиусы кругов
-    circle_radius:
-      1: 100
-      2: 160
-      3: 220
+  # London connections
+  - from: 18
+    to: 19
+    strength: strong
+    direction: mutual
+    quality: positive
+    color_group: red
+  - from: 18
+    to: 20
+    strength: normal
+    direction: mutual
+    quality: positive
+    color_group: red
+  - from: 19
+    to: 21
+    strength: weak
+    direction: mutual
+    quality: neutral
+    color_group: red
+  
+  # Hobby group
+  - from: 22
+    to: 23
+    strength: strong
+    direction: mutual
+    quality: positive
+    color_group: purple
+  - from: 22
+    to: 24
+    strength: normal
+    direction: mutual
+    quality: positive
+    color_group: purple
+  - from: 23
+    to: 25
+    strength: weak
+    direction: mutual
+    quality: positive
+    color_group: purple
+  
+  # Cross-sector connections
+  - from: 6
+    to: 12
+    strength: normal
+    direction: mutual
+    quality: positive
+    color_group: orange
+  - from: 7
+    to: 22
+    strength: weak
+    direction: mutual
+    quality: positive
+    color_group: orange
+  - from: 18
+    to: 26
+    strength: weak
+    direction: mutual
+    quality: positive
+    color_group: orange
+  - from: 3
+    to: 6
+    strength: normal
+    direction: mutual
+    quality: positive
+    color_group: orange
 
-# Настройки отображения
+layout:
+  sector_distribution:
+    Family: 60
+    Berlin: 90
+    Work: 90
+    London: 60
+    Hobby: 30
+    University: 30
+  positioning_rules:
+    sort_by: ["circle", "importance", "name"]
+    angle_spread: 55
+    circle_radius:
+      1: 180
+      2: 260
+      3: 340
 display:
   show_sector_labels: true
   show_circles: true
-  
-  # Стили линий
   line_styles:
-    strong: 
-      width: 3
+    strong:
+      width: 6
       style: solid
     normal:
       width: 2
@@ -128,21 +449,17 @@ display:
     weak:
       width: 1
       style: dashed
-  
-  # Стили точек
   point_styles:
     important:
-      size: 8
+      size: 9
       style: filled
     normal:
-      size: 6
+      size: 5
       style: filled
-  
-  # Цветовая схема
   colors:
     red: "#FF6B6B"
     blue: "#4ECDC4"
-    green: "#45B7D1"
+    green: "#2ECC71"
     yellow: "#96CEB4"
     purple: "#FFEAA7"
     orange: "#DDA0DD"
