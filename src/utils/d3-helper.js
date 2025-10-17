@@ -93,12 +93,22 @@ const getNearestBoundary = (currentAngle, startAngle, endAngle) => {
     return distToStart < distToEnd ? startAngle : endAngle;
 };
 
-const calculateLinkDistance = (maxRadius, link) => {
-    return Math.abs(link.source.circle - link.target.circle) * 0.3 * maxRadius * 0.8 + 50;
+function adjustedSigmoidTransform(x, shift = 5, scale = -1) {
+    let shiftedX = (x - shift) * scale;
+    console.log("Adjusted Sigmoid Input:", x, "Output:", 1 / (1 + Math.exp(-shiftedX)));
+    return 1 / (1 + Math.exp(-shiftedX));
+}
+
+const getLinkWidth = (data, link) => {
+    return data.display?.line_styles?.[link.strength]?.width || 2;
+}
+
+const calculateLinkDistance = (data, maxRadius, link) => {
+    return (Math.abs(link.source.circle - link.target.circle) * 0.1 * maxRadius)  + (50 + 0.1 * maxRadius * adjustedSigmoidTransform(getLinkWidth(data, link)));
 }
 
 const calculateLinkStrength = (data, link) => {
-    return data.display?.line_styles?.[link.strength]?.width * 0.1;
+    return getLinkWidth(data, link) * 0.1;
 }
 
 export const createSimulation = (nodes, links, { width, height, data, maxRadius, circleRadii }) => {
@@ -114,7 +124,7 @@ export const createSimulation = (nodes, links, { width, height, data, maxRadius,
         .force("collide", d3.forceCollide().radius(10))
         .force("link", d3.forceLink(links)
             .id(d => d.id)
-            .distance(link => calculateLinkDistance(maxRadius, link))
+            .distance(link => calculateLinkDistance(data, maxRadius, link))
             .strength(link => calculateLinkStrength(data, link)));
 
     // Fix the center node
