@@ -1,6 +1,6 @@
+# Personal social graph data (LOCAL, do not commit)
 center: "Alex"
 people:
-  # Family - Inner circle
   - id: 1
     name: "Mom"
     sector: Family
@@ -46,8 +46,6 @@ people:
     direction: mutual
     quality: positive
     color_group: green
-  
-  # Berlin - Close friends
   - id: 6
     name: "Emma"
     sector: Berlin
@@ -102,8 +100,6 @@ people:
     direction: mutual
     quality: neutral
     color_group: blue
-  
-  # Work - Professional network
   - id: 12
     name: "Isabella"
     sector: Work
@@ -158,8 +154,6 @@ people:
     direction: to_center
     quality: neutral
     color_group: yellow
-  
-  # London - Old friends
   - id: 18
     name: "Marcus"
     sector: London
@@ -196,8 +190,6 @@ people:
     direction: mutual
     quality: neutral
     color_group: red
-  
-  # Hobby - Sports/Activities
   - id: 22
     name: "Javier"
     sector: Hobby
@@ -234,8 +226,6 @@ people:
     direction: from_center
     quality: positive
     color_group: purple
-  
-  # University - Old classmates
   - id: 26
     name: "Michael"
     sector: University
@@ -265,157 +255,146 @@ people:
     color_group: orange
 
 peer_connections:
-  # Family connections
-  - from: 1
-    to: 2
+  - from: "Mom"
+    to: "Dad"
     strength: strong
     direction: mutual
     quality: positive
     color_group: green
-  - from: 1
-    to: 4
+  - from: "Mom"
+    to: "Uncle Tom"
     strength: normal
     direction: mutual
     quality: positive
     color_group: green
-  - from: 2
-    to: 4
+  - from: "Dad"
+    to: "Uncle Tom"
     strength: normal
     direction: mutual
     quality: positive
     color_group: green
-  - from: 4
-    to: 5
+  - from: "Uncle Tom"
+    to: "Aunt Jenny"
     strength: strong
     direction: mutual
     quality: positive
     color_group: green
-  
-  # Berlin friend group
-  - from: 6
-    to: 7
+  - from: "Emma"
+    to: "Carlos"
     strength: strong
     direction: mutual
     quality: positive
     color_group: blue
-  - from: 6
-    to: 8
+  - from: "Emma"
+    to: "Sophia"
     strength: normal
     direction: mutual
     quality: positive
     color_group: blue
-  - from: 7
-    to: 8
+  - from: "Carlos"
+    to: "Sophia"
     strength: strong
     direction: mutual
     quality: positive
     color_group: blue
-  - from: 8
-    to: 9
+  - from: "Sophia"
+    to: "Lucas"
     strength: normal
     direction: mutual
     quality: positive
     color_group: blue
-  - from: 9
-    to: 11
+  - from: "Lucas"
+    to: "Felix"
     strength: weak
     direction: mutual
     quality: neutral
     color_group: blue
-  
-  # Work network
-  - from: 12
-    to: 13
+  - from: "Isabella"
+    to: "James"
     strength: strong
     direction: mutual
     quality: positive
     color_group: yellow
-  - from: 12
-    to: 14
+  - from: "Isabella"
+    to: "Maria"
     strength: normal
     direction: mutual
     quality: positive
     color_group: yellow
-  - from: 13
-    to: 14
+  - from: "James"
+    to: "Maria"
     strength: normal
     direction: mutual
     quality: positive
     color_group: yellow
-  - from: 14
-    to: 15
+  - from: "Maria"
+    to: "David"
     strength: weak
     direction: mutual
     quality: neutral
     color_group: yellow
-  - from: 15
-    to: 16
+  - from: "David"
+    to: "Rachel"
     strength: weak
     direction: mutual
     quality: positive
     color_group: yellow
-  
-  # London connections
-  - from: 18
-    to: 19
+  - from: "Marcus"
+    to: "Olivia"
     strength: strong
     direction: mutual
     quality: positive
     color_group: red
-  - from: 18
-    to: 20
+  - from: "Marcus"
+    to: "Ben"
     strength: normal
     direction: mutual
     quality: positive
     color_group: red
-  - from: 19
-    to: 21
+  - from: "Olivia"
+    to: "Chloe"
     strength: weak
     direction: mutual
     quality: neutral
     color_group: red
-  
-  # Hobby group
-  - from: 22
-    to: 23
+  - from: "Javier"
+    to: "Yuki"
     strength: strong
     direction: mutual
     quality: positive
     color_group: purple
-  - from: 22
-    to: 24
+  - from: "Javier"
+    to: "Ahmed"
     strength: normal
     direction: mutual
     quality: positive
     color_group: purple
-  - from: 23
-    to: 25
+  - from: "Yuki"
+    to: "Lisa"
     strength: weak
     direction: mutual
     quality: positive
     color_group: purple
-  
-  # Cross-sector connections
-  - from: 6
-    to: 12
+  - from: "Emma"
+    to: "Isabella"
     strength: normal
     direction: mutual
     quality: positive
     color_group: orange
-  - from: 7
-    to: 22
+  - from: "Carlos"
+    to: "Javier"
     strength: weak
     direction: mutual
     quality: positive
     color_group: orange
-  - from: 18
-    to: 26
+  - from: "Marcus"
+    to: "Michael"
     strength: weak
     direction: mutual
     quality: positive
     color_group: orange
-  - from: 3
-    to: 6
+  - from: "Sarah"
+    to: "Emma"
     strength: normal
     direction: mutual
     quality: positive

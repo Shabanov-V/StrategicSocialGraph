@@ -24,7 +24,7 @@ export const processGraphDataForD3 = (data, { width, height }) => {
     
     data.people.forEach(person => {
         if (person.name !== data.center) {
-            const nodeData = { id: person.id, type: 'person', ...person };
+            const nodeData = { id: person.name, type: 'person', ...person };
             
             // Add sector boundary information to each node
             if (person.sector && sectorMap[person.sector]) {
@@ -36,13 +36,16 @@ export const processGraphDataForD3 = (data, { width, height }) => {
         }
     });
 
+
+    console.log("Nodes after processing people:", nodes);
+
     // Add peer connections
     if (data.peer_connections) {
         data.peer_connections.forEach(conn => {
             if (conn.from && conn.to) {
                 // Find the actual node objects for source and target
-                const sourceNode = nodes.find(n => n.id === conn.from);
-                const targetNode = nodes.find(n => n.id === conn.to);
+                const sourceNode = nodes.find(n => n.name === conn.from);
+                const targetNode = nodes.find(n => n.name === conn.to);
                 if (sourceNode && targetNode) {
                     links.push({ source: sourceNode, target: targetNode, ...conn });
                 }
