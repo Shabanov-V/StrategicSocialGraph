@@ -104,7 +104,7 @@ const getLinkWidth = (data, link) => {
 }
 
 const calculateLinkDistance = (data, maxRadius, link) => {
-    return (Math.abs(link.source.circle - link.target.circle) * 0.1 * maxRadius)  + (50 + 0.1 * maxRadius * adjustedSigmoidTransform(getLinkWidth(data, link)));
+    return (Math.abs(link.source.circle - link.target.circle) * 0.2 * maxRadius)  + (50 + 0.1 * maxRadius * adjustedSigmoidTransform(getLinkWidth(data, link)));
 }
 
 const calculateLinkStrength = (data, link) => {
@@ -119,8 +119,8 @@ export const createSimulation = (nodes, links, { width, height, data, maxRadius,
     // Create the simulation with basic forces
     const simulation = d3.forceSimulation(nodes)
         .force("charge", d3.forceManyBody()
-            .strength(-30)
-            .distanceMax(maxRadius * 0.1))
+            .strength(-600)
+            .distanceMax(maxRadius * 0.07))
         .force("collide", d3.forceCollide().radius(10))
         .force("link", d3.forceLink(links)
             .id(d => d.id)
