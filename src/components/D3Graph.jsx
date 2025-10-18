@@ -28,7 +28,7 @@ const D3Graph = ({ graphData }) => {
     }, []);
 
     useEffect(() => {
-        if (!graphData || !svgRef.current || !containerRef.current || dimensions.width === 0) return;
+        if (!graphData || !graphData.sectors || !svgRef.current || !containerRef.current || dimensions.width === 0) return;
 
         const { width, height } = dimensions;
         const centerX = width / 2;

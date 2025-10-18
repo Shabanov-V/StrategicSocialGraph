@@ -5,7 +5,7 @@
  */
 export function calculateSectorAngles(data) {
   if (!data.people || !data.layout?.sector_distribution || !data.layout?.positioning_rules) {
-    return data;
+    return { ...data, sectors: [] };
   }
 
   const { sector_distribution, positioning_rules } = data.layout;
