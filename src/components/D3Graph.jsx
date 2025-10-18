@@ -5,12 +5,32 @@ import { processGraphDataForD3, createSimulation, getD3Style, constrainToSector 
 const D3Graph = ({ graphData }) => {
     const svgRef = useRef(null);
     const containerRef = useRef(null);
+    const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
     const [selectedNodeInfo, setSelectedNodeInfo] = useState('Кликните на узел для получения информации');
 
     useEffect(() => {
-        if (!graphData || !svgRef.current || !containerRef.current) return;
+        const resizeObserver = new ResizeObserver(entries => {
+            if (entries && entries.length > 0) {
+                const { width, height } = entries[0].contentRect;
+                setDimensions({ width, height });
+            }
+        });
 
-        const { width, height } = containerRef.current.getBoundingClientRect();
+        if (containerRef.current) {
+            resizeObserver.observe(containerRef.current);
+        }
+
+        return () => {
+            if (containerRef.current) {
+                resizeObserver.unobserve(containerRef.current);
+            }
+        };
+    }, []);
+
+    useEffect(() => {
+        if (!graphData || !svgRef.current || !containerRef.current || dimensions.width === 0) return;
+
+        const { width, height } = dimensions;
         const centerX = width / 2;
         const centerY = height / 2;
         
@@ -195,7 +215,7 @@ const D3Graph = ({ graphData }) => {
         });
         svg.call(zoom);
 
-    }, [graphData]);
+    }, [graphData, dimensions]);
 
     if (!graphData) {
         return (

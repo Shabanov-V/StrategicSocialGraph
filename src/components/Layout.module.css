@@ -17,9 +17,32 @@
   overflow: auto; /* allow YAML editor content to scroll */
 }
 
+.leftPanel {
+  width: calc((100% - 50px) * 0.4);
+  height: 100%;
+  min-height: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #ddd;
+  overflow: auto;
+  transition: width 0.3s ease-in-out;
+}
+
+.leftPanelHidden {
+  width: 0;
+  border-right: none;
+  overflow: hidden;
+}
+
 .rightPanel {
-  width: 60%;
+  width: calc((100% - 50px) * 0.6);
   height: 100%;
   min-height: 0;
   overflow: hidden;
+  transition: width 0.3s ease-in-out;
+}
+
+.rightPanelExpanded {
+  width: calc(100% - 50px);
 }

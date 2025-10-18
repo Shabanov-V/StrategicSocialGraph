@@ -11,7 +11,12 @@ function App() {
   const [yamlText, setYamlText] = useState('');
   const [graphData, setGraphData] = useState(null);
   const [yamlError, setYamlError] = useState(null);
+  const [isEditorVisible, setIsEditorVisible] = useState(false);
   const STORAGE_KEY = 'graphYaml';
+
+  const toggleEditor = () => {
+    setIsEditorVisible(!isEditorVisible);
+  };
 
   useEffect(() => {
     try {
@@ -84,6 +89,8 @@ function App() {
       <Layout
         left={editorPanel}
         right={<D3Graph graphData={graphData} />}
+        isEditorVisible={isEditorVisible}
+        onToggleEditor={toggleEditor}
       />
     </div>
   );
