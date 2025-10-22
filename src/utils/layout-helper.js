@@ -56,7 +56,7 @@ export function calculateSectorAngles(data) {
     if (!sector) return person;
 
     const sectorGroup = sectorGroups[person.sector];
-    const personIndex = sectorGroup.findIndex(p => p.name === person.name);
+    const personIndex = sectorGroup.findIndex(p => p.id === person.id);
     const totalInSector = sectorGroup.length;
 
     // Calculate individual angle within the sector

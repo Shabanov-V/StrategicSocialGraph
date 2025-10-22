@@ -9,6 +9,7 @@ import { calculateSectorAngles } from './utils/layout-helper.js';
 
 function App() {
   const [yamlText, setYamlText] = useState('');
+  const [selectedPanel, setSelectedPanel] = useState(null);
   const [graphData, setGraphData] = useState(null);
   const [yamlError, setYamlError] = useState(null);
   const STORAGE_KEY = 'graphYaml';
@@ -64,25 +65,43 @@ function App() {
     }
   }, [yamlText]);
 
-  const editorPanel = (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <div style={{ flexGrow: 1, position: 'relative' }}>
+  const codePanel = (
+    <div className={styles.panel}>
+      <div className={styles.editorContainer}>
          <Editor value={yamlText} onChange={setYamlText} />
       </div>
       {yamlError && (
         <div className={styles.errorPanel}>
           <strong>Error parsing YAML:</strong>
-          <pre style={{ margin: 0, paddingTop: '5px' }}>{yamlError}</pre>
+          <pre className={styles.errorMessage}>{yamlError}</pre>
         </div>
       )}
     </div>
   );
 
+    const interactivePanel = (
+    <div className={styles.panel}>
+      <div className={styles.editorContainer}>
+        <input type="text" placeholder="Interactive panel content goes here" />
+      </div>
+    </div>
+  );
+
+  const choosePanel = () => {
+      if (selectedPanel === 'code') {
+        return codePanel;
+      } else if (selectedPanel === 'interactive') {
+        return interactivePanel;
+      }
+      return null;
+    }
+
   return (
     <div className={styles.app}>
-      <h1 className={styles.title}>Диаграмма социальных связей</h1>
       <Layout
-        left={editorPanel}
+        setSelectedPanel={setSelectedPanel}
+        selectedPanel={selectedPanel}
+        left={choosePanel()}
         right={<D3Graph graphData={graphData} />}
       />
     </div>

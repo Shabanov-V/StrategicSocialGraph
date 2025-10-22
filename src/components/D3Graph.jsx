@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import * as d3 from 'd3';
 import { processGraphDataForD3, createSimulation, getD3Style, constrainToSector } from '../utils/d3-helper';
+import styles from './D3Graph.module.css';
 
 const D3Graph = ({ graphData }) => {
     const svgRef = useRef(null);
@@ -199,31 +200,17 @@ const D3Graph = ({ graphData }) => {
 
     if (!graphData) {
         return (
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', border: '1px solid #eee' }}>
+            <div className={styles.loadingContainer}>
                 <p>Загрузка данных или ошибка в YAML...</p>
             </div>
         );
     }
 
     return (
-        <div ref={containerRef} style={{ position: 'relative', width: '100%', height: '100%', border: '1px solid #eee' }}>
+        <div ref={containerRef} className={styles.container}>
             <svg ref={svgRef}></svg>
             <div
-                style={{
-                    position: 'absolute',
-                    left: '50%',
-                    bottom: '20px',
-                    transform: 'translateX(-50%)',
-                    padding: '10px',
-                    border: '1px solid #ccc',
-                    background: 'rgba(249, 249, 249, 0.9)',
-                    zIndex: 10,
-                    minWidth: '250px',
-                    maxWidth: '400px',
-                    textAlign: 'center',
-                    borderRadius: '4px',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
-                }}
+                className={styles.infoPanel}
                 dangerouslySetInnerHTML={{ __html: selectedNodeInfo }}
             >
             </div>

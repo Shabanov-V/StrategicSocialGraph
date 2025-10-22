@@ -95,7 +95,6 @@ const getNearestBoundary = (currentAngle, startAngle, endAngle) => {
 
 function adjustedSigmoidTransform(x, shift = 5, scale = -1) {
     let shiftedX = (x - shift) * scale;
-    console.log("Adjusted Sigmoid Input:", x, "Output:", 1 / (1 + Math.exp(-shiftedX)));
     return 1 / (1 + Math.exp(-shiftedX));
 }
 

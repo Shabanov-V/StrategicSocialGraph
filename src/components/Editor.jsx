@@ -1,6 +1,7 @@
 import React from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { yaml } from '@codemirror/lang-yaml';
+import styles from './Editor.module.css';
 
 const Editor = ({ value, onChange }) => {
   const handleChange = (newValue) => {
@@ -10,13 +11,13 @@ const Editor = ({ value, onChange }) => {
   };
 
   return (
-    <div style={{ height: '100%' }}>
+    <div className={styles.editorContainer}>
       <CodeMirror
         value={value}
         height="100%"
         extensions={[yaml()]}
         onChange={handleChange}
-        style={{ height: '100%' }}
+        className={styles.editor}
       />
     </div>
   );

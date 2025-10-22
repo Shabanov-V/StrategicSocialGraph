@@ -12,7 +12,6 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid #ddd;
   width: 20%; /* explicit width for proper animation */
   transition: all 0.3s ease-in-out;
   overflow: auto; /* allow YAML editor content to scroll */
