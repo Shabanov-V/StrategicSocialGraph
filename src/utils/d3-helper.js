@@ -36,9 +36,6 @@ export const processGraphDataForD3 = (data, { width, height }) => {
         }
     });
 
-
-    console.log("Nodes after processing people:", nodes);
-
     // Add peer connections
     if (data.peer_connections) {
         data.peer_connections.forEach(conn => {
@@ -103,7 +100,8 @@ const getLinkWidth = (data, link) => {
 }
 
 const calculateLinkDistance = (data, maxRadius, link) => {
-    return (Math.abs(link.source.circle - link.target.circle) * 0.2 * maxRadius)  + (50 + 0.1 * maxRadius * adjustedSigmoidTransform(getLinkWidth(data, link)));
+    const distancesByCircle = [0, 20, 70];
+    return (distancesByCircle[Math.abs(link.source.circle - link.target.circle)] * 0.01 * maxRadius)  + (50 + 0.1 * maxRadius * adjustedSigmoidTransform(getLinkWidth(data, link)));
 }
 
 const calculateLinkStrength = (data, link) => {
@@ -179,23 +177,27 @@ export const createSimulation = (nodes, links, { width, height, data, maxRadius,
                 }
             }
 
-            // Apply a soft correction (impulse) towards the allowed position instead of hard snapping
+            // Apply strict boundary enforcement with hard limits
             if (needsCorrection) {
                 const boundaryAngle = ((finalAngle - 90) * Math.PI) / 180;
                 const targetX = centerX + Math.cos(boundaryAngle) * correctedDistance;
                 const targetY = centerY + Math.sin(boundaryAngle) * correctedDistance;
 
-                // Correction strength (tweakable). Scale with alpha so corrections reduce as simulation cools.
-                const k = 0.2;
-                const strength = k * Math.max(alpha, 0.01);
+                // Force position to boundary
+                node.x = targetX;
+                node.y = targetY;
 
-                // Apply corrective impulse to velocities (soft move toward allowed region)
-                node.vx += (targetX - node.x) * strength;
-                node.vy += (targetY - node.y) * strength;
-
-                // Mild damping to prevent oscillation and reduce sticking along boundary
-                node.vx *= 0.92;
-                node.vy *= 0.92;
+                // Calculate new velocities to maintain smooth movement along boundaries
+                const dx = targetX - node.x;
+                const dy = targetY - node.y;
+                
+                // Project velocity onto the boundary to allow sliding
+                const currentAngle = Math.atan2(dy, dx);
+                const tangentAngle = currentAngle + Math.PI / 2;
+                const vDot = node.vx * Math.cos(tangentAngle) + node.vy * Math.sin(tangentAngle);
+                
+                node.vx = vDot * Math.cos(tangentAngle) * 0.8;
+                node.vy = vDot * Math.sin(tangentAngle) * 0.8;
             }
         });
     });

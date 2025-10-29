@@ -17,6 +17,7 @@ function InteractivePanel({ yamlText, setYamlText }) {
   });
 
   const [sectors, setSectors] = useState([]);
+  const [nextId, setNextId] = useState('1');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -51,9 +52,33 @@ function InteractivePanel({ yamlText, setYamlText }) {
       // dedupe and sort
       const unique = Array.from(new Set(list)).sort((a, b) => a.localeCompare(b));
       setSectors(unique);
+      // --- compute next available numeric ID ---
+      try {
+        const used = new Set();
+        candidates.forEach(item => {
+          if (!item) return;
+          // consider numeric ids only
+          const raw = item.id;
+          const n = parseInt(raw, 10);
+          if (!Number.isNaN(n) && n > 0) used.add(n);
+        });
+
+        // find smallest positive integer not in used
+        let candidateId = 1;
+        while (used.has(candidateId)) candidateId += 1;
+        setNextId(String(candidateId));
+        // also update the form id so the input shows the computed id
+        setFormData(prev => ({ ...prev, id: String(candidateId) }));
+      } catch (err) {
+        // fallback to 1
+        setNextId('1');
+        setFormData(prev => ({ ...prev, id: '1' }));
+      }
     } catch (err) {
       // If YAML can't be parsed, keep sectors empty
       setSectors([]);
+      setNextId('1');
+      setFormData(prev => ({ ...prev, id: '1' }));
     }
   }, [yamlText]);
 
@@ -66,12 +91,12 @@ function InteractivePanel({ yamlText, setYamlText }) {
       // Determine sector value: use customSector when user selected Other
       const sectorValue = formData.sector === '__other' ? formData.customSector : formData.sector;
 
-      // Convert id and circle to numbers and set sector
+      // Use the computed nextId (formData.id is kept in sync) and ensure numeric id
       const newNode = {
         ...formData,
         sector: sectorValue,
-        id: parseInt(formData.id),
-        circle: parseInt(formData.circle)
+        id: parseInt(formData.id, 10),
+        circle: parseInt(formData.circle, 10)
       };
       // Validate circle is 1, 2, or 3
       if (![1, 2, 3].includes(newNode.circle)) {
@@ -96,19 +121,50 @@ function InteractivePanel({ yamlText, setYamlText }) {
       // Update the YAML text in the parent component
       setYamlText(updatedYaml);
 
-      // Reset the form
-      setFormData({
-        name: '',
-        id: '',
-        sector: '',
-        customSector: '',
-        circle: '2', // reset to default 2
-        importance: 'normal',
-        strength: 'normal',
-        direction: 'mutual',
-        quality: 'positive',
-        color_group: 'friend'
-      });
+      // After adding, recompute next id from updated YAML by loading it back
+      try {
+        const reloaded = yaml.load(updatedYaml) || {};
+        const items = [];
+        if (Array.isArray(reloaded.nodes)) items.push(...reloaded.nodes);
+        if (Array.isArray(reloaded.people)) items.push(...reloaded.people);
+        const used = new Set();
+        items.forEach(item => {
+          if (!item) return;
+          const n = parseInt(item.id, 10);
+          if (!Number.isNaN(n) && n > 0) used.add(n);
+        });
+        let candidateId = 1;
+        while (used.has(candidateId)) candidateId += 1;
+        setNextId(String(candidateId));
+
+        setFormData({
+          name: '',
+          id: String(candidateId),
+          sector: '',
+          customSector: '',
+          circle: '2', // reset to default 2
+          importance: 'normal',
+          strength: 'normal',
+          direction: 'mutual',
+          quality: 'positive',
+          color_group: 'friend'
+        });
+      } catch (err) {
+        // fallback reset
+        setNextId('1');
+        setFormData({
+          name: '',
+          id: '1',
+          sector: '',
+          customSector: '',
+          circle: '2',
+          importance: 'normal',
+          strength: 'normal',
+          direction: 'mutual',
+          quality: 'positive',
+          color_group: 'friend'
+        });
+      }
 
       console.log('Node added successfully');
     } catch (error) {
@@ -131,17 +187,8 @@ function InteractivePanel({ yamlText, setYamlText }) {
           />
         </div>
 
-        <div className={styles.formGroup}>
-          <label htmlFor="id">ID:</label>
-          <input
-            type="number"
-            id="id"
-            name="id"
-            value={formData.id}
-            onChange={handleChange}
-            required
-          />
-        </div>
+        {/* ID is auto-assigned and hidden from the user UI */}
+        <input type="hidden" id="id" name="id" value={formData.id} />
 
         <div className={styles.formGroup}>
           <label htmlFor="sector">Sector:</label>
