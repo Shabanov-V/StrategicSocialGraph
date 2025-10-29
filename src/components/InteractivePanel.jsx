@@ -8,7 +8,7 @@ function InteractivePanel({ yamlText, setYamlText }) {
     id: '',
     sector: '',
     customSector: '',
-    circle: '',
+    circle: '2', // default circle is 2
     importance: 'normal',
     strength: 'normal',
     direction: 'mutual',
@@ -20,6 +20,10 @@ function InteractivePanel({ yamlText, setYamlText }) {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    // Only allow circle to be 1, 2, or 3
+    if (name === 'circle') {
+      if (!['1', '2', '3', 1, 2, 3].includes(value)) return;
+    }
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -69,6 +73,11 @@ function InteractivePanel({ yamlText, setYamlText }) {
         id: parseInt(formData.id),
         circle: parseInt(formData.circle)
       };
+      // Validate circle is 1, 2, or 3
+      if (![1, 2, 3].includes(newNode.circle)) {
+        alert('Circle must be 1, 2, or 3');
+        return;
+      }
 
       // Add new node to either people or nodes array depending on file format
       if (Array.isArray(currentData.people)) {
@@ -93,7 +102,7 @@ function InteractivePanel({ yamlText, setYamlText }) {
         id: '',
         sector: '',
         customSector: '',
-        circle: '',
+        circle: '2', // reset to default 2
         importance: 'normal',
         strength: 'normal',
         direction: 'mutual',
@@ -166,15 +175,17 @@ function InteractivePanel({ yamlText, setYamlText }) {
 
         <div className={styles.formGroup}>
           <label htmlFor="circle">Circle:</label>
-          <input
-            type="number"
+          <select
             id="circle"
             name="circle"
             value={formData.circle}
-            min="1"
             onChange={handleChange}
             required
-          />
+          >
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+          </select>
         </div>
 
         <div className={styles.formGroup}>

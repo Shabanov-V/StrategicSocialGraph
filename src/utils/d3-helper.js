@@ -133,8 +133,9 @@ export const createSimulation = (nodes, links, { width, height, data, maxRadius,
         centerNode.fy = centerY;
     }
 
-    // Add sector boundary constraint force (runs last to override other forces)
-    simulation.force("sectorBoundary", () => {
+    // Add sector boundary constraint force (soft corrective - nudges nodes back inside bounds)
+    // Using a soft correction avoids hard snapping which causes nodes to "stick" and only slide along boundaries.
+    simulation.force("sectorBoundary", (alpha) => {
         nodes.forEach(node => {
             // Skip center node
             if (node.type === 'center') {
@@ -151,11 +152,11 @@ export const createSimulation = (nodes, links, { width, height, data, maxRadius,
             let needsCorrection = false;
             let correctedDistance = distance;
 
-            // Hard constrain distance to circle boundaries (no tolerance)
+            // Determine allowed radial range
             if (node.circle !== undefined) {
                 const minRadius = node.circle === 1 ? 0 : circleRadii[node.circle - 2];
                 const maxRadius = circleRadii[node.circle - 1];
-                
+
                 if (distance < minRadius) {
                     correctedDistance = minRadius;
                     needsCorrection = true;
@@ -165,57 +166,36 @@ export const createSimulation = (nodes, links, { width, height, data, maxRadius,
                 }
             }
 
-            // Check sector boundaries
+            // Check sector angular boundaries
             let finalAngle = adjustedAngle;
             if (node.sectorStartAngle !== undefined && node.sectorEndAngle !== undefined) {
                 if (!isAngleInSector(adjustedAngle, node.sectorStartAngle, node.sectorEndAngle)) {
                     finalAngle = getNearestBoundary(
-                        adjustedAngle, 
-                        node.sectorStartAngle, 
+                        adjustedAngle,
+                        node.sectorStartAngle,
                         node.sectorEndAngle
                     );
                     needsCorrection = true;
                 }
             }
 
-            // Apply hard corrections - immediately snap to boundary
+            // Apply a soft correction (impulse) towards the allowed position instead of hard snapping
             if (needsCorrection) {
                 const boundaryAngle = ((finalAngle - 90) * Math.PI) / 180;
-                
-                // Hard snap to corrected position
-                node.x = centerX + Math.cos(boundaryAngle) * correctedDistance;
-                node.y = centerY + Math.sin(boundaryAngle) * correctedDistance;
-                
-                // Zero out velocity component that's pushing out of bounds
-                const boundaryDirX = Math.cos(boundaryAngle);
-                const boundaryDirY = Math.sin(boundaryAngle);
-                
-                // Calculate radial direction (away from center)
-                const radialX = node.x - centerX;
-                const radialY = node.y - centerY;
-                const radialDist = Math.sqrt(radialX * radialX + radialY * radialY);
-                const radialDirX = radialDist > 0 ? radialX / radialDist : 0;
-                const radialDirY = radialDist > 0 ? radialY / radialDist : 0;
-                
-                // Remove velocity component perpendicular to boundary (angular)
-                const tangentX = -boundaryDirY; // Perpendicular to radial
-                const tangentY = boundaryDirX;
-                const vDotTangent = node.vx * tangentX + node.vy * tangentY;
-                
-                // Keep only tangential velocity (allow sliding along boundaries)
-                node.vx = vDotTangent * tangentX * 0.3; // Dampen sliding
-                node.vy = vDotTangent * tangentY * 0.3;
-                
-                // If at circle boundary, also remove radial velocity pushing outward
-                if (distance !== correctedDistance) {
-                    const vDotRadial = node.vx * radialDirX + node.vy * radialDirY;
-                    // Remove outward radial velocity
-                    if ((distance < correctedDistance && vDotRadial < 0) || 
-                        (distance > correctedDistance && vDotRadial > 0)) {
-                        node.vx -= vDotRadial * radialDirX;
-                        node.vy -= vDotRadial * radialDirY;
-                    }
-                }
+                const targetX = centerX + Math.cos(boundaryAngle) * correctedDistance;
+                const targetY = centerY + Math.sin(boundaryAngle) * correctedDistance;
+
+                // Correction strength (tweakable). Scale with alpha so corrections reduce as simulation cools.
+                const k = 0.2;
+                const strength = k * Math.max(alpha, 0.01);
+
+                // Apply corrective impulse to velocities (soft move toward allowed region)
+                node.vx += (targetX - node.x) * strength;
+                node.vy += (targetY - node.y) * strength;
+
+                // Mild damping to prevent oscillation and reduce sticking along boundary
+                node.vx *= 0.92;
+                node.vy *= 0.92;
             }
         });
     });
