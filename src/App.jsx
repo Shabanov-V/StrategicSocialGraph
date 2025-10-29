@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import yaml from 'js-yaml';
-import Editor from './components/Editor';
 import D3Graph from './components/D3Graph.jsx';
 import Layout from './components/Layout';
+import InteractivePanel from './components/InteractivePanel';
+import CodePanel from './components/CodePanel';
 import styles from './App.module.css';
 import './App.css';
 import { calculateSectorAngles } from './utils/layout-helper.js';
@@ -65,33 +66,11 @@ function App() {
     }
   }, [yamlText]);
 
-  const codePanel = (
-    <div className={styles.panel}>
-      <div className={styles.editorContainer}>
-         <Editor value={yamlText} onChange={setYamlText} />
-      </div>
-      {yamlError && (
-        <div className={styles.errorPanel}>
-          <strong>Error parsing YAML:</strong>
-          <pre className={styles.errorMessage}>{yamlError}</pre>
-        </div>
-      )}
-    </div>
-  );
-
-    const interactivePanel = (
-    <div className={styles.panel}>
-      <div className={styles.editorContainer}>
-        <input type="text" placeholder="Interactive panel content goes here" />
-      </div>
-    </div>
-  );
-
   const choosePanel = () => {
       if (selectedPanel === 'code') {
-        return codePanel;
+        return <CodePanel value={yamlText} onChange={setYamlText} error={yamlError} />;
       } else if (selectedPanel === 'interactive') {
-        return interactivePanel;
+        return <InteractivePanel yamlText={yamlText} setYamlText={setYamlText} />;
       }
       return null;
     }
