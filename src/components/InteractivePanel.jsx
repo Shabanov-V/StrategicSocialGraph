@@ -21,6 +21,7 @@ function InteractivePanel({ yamlText, setYamlText }) {
   });
 
   const [sectors, setSectors] = useState([]);
+  const [colorGroups, setColorGroups] = useState({});
   const [nextId, setNextId] = useState('1');
 
   const handleChange = (e) => {
@@ -58,6 +59,12 @@ function InteractivePanel({ yamlText, setYamlText }) {
       // dedupe and sort
       const unique = Array.from(new Set(list)).sort((a, b) => a.localeCompare(b));
       setSectors(unique);
+
+      if (data && data.display && data.display.colors) {
+        setColorGroups(data.display.colors);
+      } else {
+        setColorGroups({});
+      }
       // --- compute next available numeric ID ---
       try {
         const used = new Set();
@@ -261,6 +268,7 @@ function InteractivePanel({ yamlText, setYamlText }) {
         <PersonForm
           formData={formData}
           sectors={sectors}
+          colorGroups={colorGroups}
           handleChange={handleChange}
           handleSubmit={handleSubmit}
           buttonText="Add Node"
@@ -288,6 +296,7 @@ function InteractivePanel({ yamlText, setYamlText }) {
             <PersonForm
               formData={formData}
               sectors={sectors}
+              colorGroups={colorGroups}
               handleChange={handleChange}
               handleSubmit={handleEditSubmit}
               buttonText="Save Changes"

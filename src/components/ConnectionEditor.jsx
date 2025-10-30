@@ -13,6 +13,7 @@ function ConnectionEditor({ yamlText, setYamlText }) {
   });
 
   const [people, setPeople] = useState([]);
+  const [colorGroups, setColorGroups] = useState({});
 
   // Load people list from YAML
   useEffect(() => {
@@ -28,6 +29,12 @@ function ConnectionEditor({ yamlText, setYamlText }) {
       }
       
       setPeople(peopleList);
+
+      if (data && data.display && data.display.colors) {
+        setColorGroups(data.display.colors);
+      } else {
+        setColorGroups({});
+      }
     } catch (err) {
       console.error('Error parsing YAML:', err);
       setPeople([]);
@@ -278,10 +285,9 @@ function ConnectionEditor({ yamlText, setYamlText }) {
               value={formData.color_group}
               onChange={handleChange}
             >
-              <option value="friend">Friend</option>
-              <option value="family">Family</option>
-              <option value="work">Work</option>
-              <option value="other">Other</option>
+              {Object.keys(colorGroups).map(group => (
+                <option key={group} value={group}>{group}</option>
+              ))}
             </select>
           </div>
 
@@ -370,10 +376,9 @@ function ConnectionEditor({ yamlText, setYamlText }) {
                   value={formData.color_group}
                   onChange={handleChange}
                 >
-                  <option value="friend">Friend</option>
-                  <option value="family">Family</option>
-                  <option value="work">Work</option>
-                  <option value="other">Other</option>
+                  {Object.keys(colorGroups).map(group => (
+                    <option key={group} value={group}>{group}</option>
+                  ))}
                 </select>
               </div>
               <button type="submit" className={styles.submitButton} onClick={handleEditSubmit}>
