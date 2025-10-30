@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import yaml from 'js-yaml';
 import styles from './InteractivePanel.module.css';
+import PersonForm from './PersonForm';
 
 function InteractivePanel({ yamlText, setYamlText }) {
+  const [activeTab, setActiveTab] = useState('add');
+  const [people, setPeople] = useState([]);
+  const [selectedPerson, setSelectedPerson] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     id: '',
@@ -40,6 +44,8 @@ function InteractivePanel({ yamlText, setYamlText }) {
       const candidates = [];
       if (Array.isArray(data.nodes)) candidates.push(...data.nodes);
       if (Array.isArray(data.people)) candidates.push(...data.people);
+
+      setPeople(candidates);
 
       candidates.forEach(item => {
         if (item && item.sector) {
@@ -81,6 +87,69 @@ function InteractivePanel({ yamlText, setYamlText }) {
       setFormData(prev => ({ ...prev, id: '1' }));
     }
   }, [yamlText]);
+
+  useEffect(() => {
+    if (selectedPerson) {
+      const person = people.find(p => p.id === parseInt(selectedPerson));
+      if (person) {
+        setFormData({
+          ...person,
+          id: person.id,
+          circle: String(person.circle),
+        });
+      }
+    } else {
+      setFormData({
+        name: '',
+        id: nextId,
+        sector: '',
+        customSector: '',
+        circle: '2',
+        importance: 'normal',
+        strength: 'normal',
+        direction: 'mutual',
+        quality: 'positive',
+        color_group: 'friend'
+      });
+    }
+  }, [selectedPerson, people, nextId]);
+
+  const handleEditSubmit = (e) => {
+    e.preventDefault();
+    try {
+      const currentData = yaml.load(yamlText) || {};
+      const sectorValue = formData.sector === '__other' ? formData.customSector : formData.sector;
+      const updatedNode = {
+        ...formData,
+        sector: sectorValue,
+        id: parseInt(formData.id, 10),
+        circle: parseInt(formData.circle, 10)
+      };
+
+      if (![1, 2, 3].includes(updatedNode.circle)) {
+        alert('Circle must be 1, 2, or 3');
+        return;
+      }
+
+      const update = (arr) => {
+        const index = arr.findIndex(p => p.id === updatedNode.id);
+        if (index !== -1) arr[index] = updatedNode;
+      };
+
+      if (Array.isArray(currentData.people)) update(currentData.people);
+      if (Array.isArray(currentData.nodes)) update(currentData.nodes);
+
+      const updatedYaml = yaml.dump(currentData, {
+        indent: 2,
+        lineWidth: -1
+      });
+
+      setYamlText(updatedYaml);
+      alert('Person updated successfully!');
+    } catch (error) {
+      console.error('Error updating YAML:', error);
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -174,142 +243,59 @@ function InteractivePanel({ yamlText, setYamlText }) {
 
   return (
     <div className={styles.panel}>
-      <form className={styles.form} onSubmit={handleSubmit}>
-        <div className={styles.formGroup}>
-          <label htmlFor="name">Name:</label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-          />
-        </div>
+      <div className={styles.tabs}>
+        <button
+          className={`${styles.tabButton} ${activeTab === 'add' ? styles.active : ''}`}
+          onClick={() => setActiveTab('add')}
+        >
+          Add
+        </button>
+        <button
+          className={`${styles.tabButton} ${activeTab === 'edit' ? styles.active : ''}`}
+          onClick={() => setActiveTab('edit')}
+        >
+          Edit
+        </button>
+      </div>
 
-        {/* ID is auto-assigned and hidden from the user UI */}
-        <input type="hidden" id="id" name="id" value={formData.id} />
+      {activeTab === 'add' && (
+        <PersonForm
+          formData={formData}
+          sectors={sectors}
+          handleChange={handleChange}
+          handleSubmit={handleSubmit}
+          buttonText="Add Node"
+        />
+      )}
 
-        <div className={styles.formGroup}>
-          <label htmlFor="sector">Sector:</label>
-          <select
-            id="sector"
-            name="sector"
-            value={formData.sector}
-            onChange={handleChange}
-            required
-          >
-            <option value="">-- select sector --</option>
-            {sectors.map(s => (
-              <option key={s} value={s}>{s}</option>
-            ))}
-            <option value="__other">Other (custom)</option>
-          </select>
+      {activeTab === 'edit' && (
+        <div>
+          <div className={styles.formGroup}>
+            <label htmlFor="person">Person:</label>
+            <select
+              id="person"
+              name="person"
+              value={selectedPerson}
+              onChange={e => setSelectedPerson(e.target.value)}
+            >
+              <option value="">-- select person --</option>
+              {people.map(p => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
+          </div>
 
-          {formData.sector === '__other' && (
-            <input
-              type="text"
-              id="customSector"
-              name="customSector"
-              placeholder="Enter custom sector"
-              value={formData.customSector}
-              onChange={handleChange}
-              required
-              style={{ marginTop: '6px' }}
+          {selectedPerson && (
+            <PersonForm
+              formData={formData}
+              sectors={sectors}
+              handleChange={handleChange}
+              handleSubmit={handleEditSubmit}
+              buttonText="Save Changes"
             />
           )}
         </div>
-
-        <div className={styles.formGroup}>
-          <label htmlFor="circle">Circle:</label>
-          <select
-            id="circle"
-            name="circle"
-            value={formData.circle}
-            onChange={handleChange}
-            required
-          >
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-          </select>
-        </div>
-
-        <div className={styles.formGroup}>
-          <label htmlFor="importance">Importance:</label>
-          <select
-            id="importance"
-            name="importance"
-            value={formData.importance}
-            onChange={handleChange}
-          >
-            <option value="normal">Normal</option>
-            <option value="high">High</option>
-            <option value="low">Low</option>
-          </select>
-        </div>
-
-        <div className={styles.formGroup}>
-          <label htmlFor="strength">Strength:</label>
-          <select
-            id="strength"
-            name="strength"
-            value={formData.strength}
-            onChange={handleChange}
-          >
-            <option value="normal">Normal</option>
-            <option value="strong">Strong</option>
-            <option value="weak">Weak</option>
-          </select>
-        </div>
-
-        <div className={styles.formGroup}>
-          <label htmlFor="direction">Direction:</label>
-          <select
-            id="direction"
-            name="direction"
-            value={formData.direction}
-            onChange={handleChange}
-          >
-            <option value="mutual">Mutual</option>
-            <option value="incoming">Incoming</option>
-            <option value="outgoing">Outgoing</option>
-          </select>
-        </div>
-
-        <div className={styles.formGroup}>
-          <label htmlFor="quality">Quality:</label>
-          <select
-            id="quality"
-            name="quality"
-            value={formData.quality}
-            onChange={handleChange}
-          >
-            <option value="positive">Positive</option>
-            <option value="negative">Negative</option>
-            <option value="neutral">Neutral</option>
-          </select>
-        </div>
-
-        <div className={styles.formGroup}>
-          <label htmlFor="color_group">Color Group:</label>
-          <select
-            id="color_group"
-            name="color_group"
-            value={formData.color_group}
-            onChange={handleChange}
-          >
-            <option value="friend">Friend</option>
-            <option value="family">Family</option>
-            <option value="work">Work</option>
-            <option value="other">Other</option>
-          </select>
-        </div>
-
-        <button type="submit" className={styles.submitButton}>
-          Add Node
-        </button>
-      </form>
+      )}
     </div>
   );
 }
