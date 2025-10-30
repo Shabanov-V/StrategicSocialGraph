@@ -30,11 +30,23 @@ function ConnectionEditor({ yamlText, setYamlText }) {
       
       setPeople(peopleList);
 
-      if (data && data.display && data.display.colors) {
-        setColorGroups(data.display.colors);
-      } else {
-        setColorGroups({});
-      }
+      const newColorGroups = (data && data.display && data.display.colors) || {};
+      setColorGroups(newColorGroups);
+
+      setFormData(prev => {
+        const availableColorGroups = Object.keys(newColorGroups);
+        const currentGroup = prev.color_group;
+
+        if (availableColorGroups.length === 0) {
+          return { ...prev, color_group: '' };
+        }
+
+        if (!availableColorGroups.includes(currentGroup)) {
+          return { ...prev, color_group: availableColorGroups[0] };
+        }
+
+        return prev;
+      });
     } catch (err) {
       console.error('Error parsing YAML:', err);
       setPeople([]);
@@ -277,19 +289,21 @@ function ConnectionEditor({ yamlText, setYamlText }) {
             </select>
           </div>
 
-          <div className={styles.formGroup}>
-            <label htmlFor="color_group">Color Group:</label>
-            <select
-              id="color_group"
-              name="color_group"
-              value={formData.color_group}
-              onChange={handleChange}
-            >
-              {Object.keys(colorGroups).map(group => (
-                <option key={group} value={group}>{group}</option>
-              ))}
-            </select>
-          </div>
+          {Object.keys(colorGroups).length > 0 && (
+            <div className={styles.formGroup}>
+              <label htmlFor="color_group">Color Group:</label>
+              <select
+                id="color_group"
+                name="color_group"
+                value={formData.color_group}
+                onChange={handleChange}
+              >
+                {Object.keys(colorGroups).map(group => (
+                  <option key={group} value={group}>{group}</option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <button type="submit" className={styles.submitButton}>
             Add Connection
@@ -368,19 +382,21 @@ function ConnectionEditor({ yamlText, setYamlText }) {
                   <option value="neutral">Neutral</option>
                 </select>
               </div>
-              <div className={styles.formGroup}>
-                <label htmlFor="color_group">Color Group:</label>
-                <select
-                  id="color_group"
-                  name="color_group"
-                  value={formData.color_group}
-                  onChange={handleChange}
-                >
-                  {Object.keys(colorGroups).map(group => (
-                    <option key={group} value={group}>{group}</option>
-                  ))}
-                </select>
-              </div>
+              {Object.keys(colorGroups).length > 0 && (
+                <div className={styles.formGroup}>
+                  <label htmlFor="color_group">Color Group:</label>
+                  <select
+                    id="color_group"
+                    name="color_group"
+                    value={formData.color_group}
+                    onChange={handleChange}
+                  >
+                    {Object.keys(colorGroups).map(group => (
+                      <option key={group} value={group}>{group}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
               <button type="submit" className={styles.submitButton} onClick={handleEditSubmit}>
                 Save Changes
               </button>

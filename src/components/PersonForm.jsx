@@ -119,19 +119,21 @@ function PersonForm({ formData, sectors, colorGroups, handleChange, handleSubmit
         </select>
       </div>
 
-      <div className={styles.formGroup}>
-        <label htmlFor="color_group">Color Group:</label>
-        <select
-          id="color_group"
-          name="color_group"
-          value={formData.color_group}
-          onChange={handleChange}
-        >
-          {colorGroups && Object.keys(colorGroups).map(group => (
-            <option key={group} value={group}>{group}</option>
-          ))}
-        </select>
-      </div>
+      {colorGroups && Object.keys(colorGroups).length > 0 && (
+        <div className={styles.formGroup}>
+          <label htmlFor="color_group">Color Group:</label>
+          <select
+            id="color_group"
+            name="color_group"
+            value={formData.color_group}
+            onChange={handleChange}
+          >
+            {Object.keys(colorGroups).map(group => (
+              <option key={group} value={group}>{group}</option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <button type="submit" className={styles.submitButton}>
         {buttonText}

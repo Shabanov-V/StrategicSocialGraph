@@ -60,11 +60,27 @@ function InteractivePanel({ yamlText, setYamlText }) {
       const unique = Array.from(new Set(list)).sort((a, b) => a.localeCompare(b));
       setSectors(unique);
 
-      if (data && data.display && data.display.colors) {
-        setColorGroups(data.display.colors);
-      } else {
-        setColorGroups({});
-      }
+      const newColorGroups = (data && data.display && data.display.colors) || {};
+      setColorGroups(newColorGroups);
+
+      setFormData(prev => {
+        const availableColorGroups = Object.keys(newColorGroups);
+        const currentGroup = prev.color_group;
+
+        // If no groups are available, the selection must be empty.
+        if (availableColorGroups.length === 0) {
+          return { ...prev, color_group: '' };
+        }
+
+        // If groups are available, check if the current selection is valid.
+        if (!availableColorGroups.includes(currentGroup)) {
+          // If not valid, set it to the first available group.
+          return { ...prev, color_group: availableColorGroups[0] };
+        }
+
+        // Otherwise, the selection is valid, so no change is needed.
+        return prev;
+      });
       // --- compute next available numeric ID ---
       try {
         const used = new Set();
