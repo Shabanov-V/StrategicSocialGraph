@@ -15,7 +15,7 @@ const D3Graph = ({ graphData }) => {
         const centerX = width / 2;
         const centerY = height / 2;
         
-        const maxRadius = Math.min(width, height) * 1.2;
+        const maxRadius = height * 2;
         const circleRadii = [
             maxRadius * 0.33,  // Circle 1 max radius
             maxRadius * 0.66,  // Circle 2 max radius

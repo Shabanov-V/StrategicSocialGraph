@@ -7,7 +7,7 @@
 }
 
 .leftPanel {
-  height: 100%;
+  height: 80%;
   min-height: 0; /* enable nested scrolling for editor */
   position: relative;
   display: flex;
@@ -17,6 +17,10 @@
   transition: all 0.3s ease-in-out;
   overflow: auto; /* allow YAML editor content to scroll */
   z-index: 10;
+  background-color: #fff;
+  padding: 20px;
+  margin: 20px;
+  border-radius: 20px;
 }
 
 .rightPanel {
