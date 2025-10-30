@@ -21,6 +21,7 @@ function InteractivePanel({ yamlText, setYamlText }) {
   });
 
   const [sectors, setSectors] = useState([]);
+  const [colorGroups, setColorGroups] = useState({});
   const [nextId, setNextId] = useState('1');
 
   const handleChange = (e) => {
@@ -58,6 +59,28 @@ function InteractivePanel({ yamlText, setYamlText }) {
       // dedupe and sort
       const unique = Array.from(new Set(list)).sort((a, b) => a.localeCompare(b));
       setSectors(unique);
+
+      const newColorGroups = (data && data.display && data.display.colors) || {};
+      setColorGroups(newColorGroups);
+
+      setFormData(prev => {
+        const availableColorGroups = Object.keys(newColorGroups);
+        const currentGroup = prev.color_group;
+
+        // If no groups are available, the selection must be empty.
+        if (availableColorGroups.length === 0) {
+          return { ...prev, color_group: '' };
+        }
+
+        // If groups are available, check if the current selection is valid.
+        if (!availableColorGroups.includes(currentGroup)) {
+          // If not valid, set it to the first available group.
+          return { ...prev, color_group: availableColorGroups[0] };
+        }
+
+        // Otherwise, the selection is valid, so no change is needed.
+        return prev;
+      });
       // --- compute next available numeric ID ---
       try {
         const used = new Set();
@@ -261,6 +284,7 @@ function InteractivePanel({ yamlText, setYamlText }) {
         <PersonForm
           formData={formData}
           sectors={sectors}
+          colorGroups={colorGroups}
           handleChange={handleChange}
           handleSubmit={handleSubmit}
           buttonText="Add Node"
@@ -288,6 +312,7 @@ function InteractivePanel({ yamlText, setYamlText }) {
             <PersonForm
               formData={formData}
               sectors={sectors}
+              colorGroups={colorGroups}
               handleChange={handleChange}
               handleSubmit={handleEditSubmit}
               buttonText="Save Changes"

@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from './InteractivePanel.module.css';
 
-function PersonForm({ formData, sectors, handleChange, handleSubmit, buttonText }) {
+function PersonForm({ formData, sectors, colorGroups, handleChange, handleSubmit, buttonText }) {
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
       <div className={styles.formGroup}>
@@ -119,20 +119,21 @@ function PersonForm({ formData, sectors, handleChange, handleSubmit, buttonText 
         </select>
       </div>
 
-      <div className={styles.formGroup}>
-        <label htmlFor="color_group">Color Group:</label>
-        <select
-          id="color_group"
-          name="color_group"
-          value={formData.color_group}
-          onChange={handleChange}
-        >
-          <option value="friend">Friend</option>
-          <option value="family">Family</option>
-          <option value="work">Work</option>
-          <option value="other">Other</option>
-        </select>
-      </div>
+      {colorGroups && Object.keys(colorGroups).length > 0 && (
+        <div className={styles.formGroup}>
+          <label htmlFor="color_group">Color Group:</label>
+          <select
+            id="color_group"
+            name="color_group"
+            value={formData.color_group}
+            onChange={handleChange}
+          >
+            {Object.keys(colorGroups).map(group => (
+              <option key={group} value={group}>{group}</option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <button type="submit" className={styles.submitButton}>
         {buttonText}
