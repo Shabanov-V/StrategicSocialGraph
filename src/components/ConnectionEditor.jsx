@@ -115,7 +115,6 @@ function ConnectionEditor({ yamlText, setYamlText }) {
       setYamlText(updatedYaml);
       setEditFrom('');
       setEditTo('');
-      alert('Connection deleted successfully!');
     } catch (error) {
       console.error('Error updating YAML:', error);
     }
@@ -142,7 +141,6 @@ function ConnectionEditor({ yamlText, setYamlText }) {
           lineWidth: -1,
         });
         setYamlText(updatedYaml);
-        alert('Connection updated successfully!');
       }
     } catch (error) {
       console.error('Error updating YAML:', error);

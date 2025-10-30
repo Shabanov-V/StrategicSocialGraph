@@ -145,7 +145,6 @@ function InteractivePanel({ yamlText, setYamlText }) {
       });
 
       setYamlText(updatedYaml);
-      alert('Person updated successfully!');
     } catch (error) {
       console.error('Error updating YAML:', error);
     }
