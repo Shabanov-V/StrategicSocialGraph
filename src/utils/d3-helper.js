@@ -1,7 +1,7 @@
 // src/utils/d3-helper.js
 import * as d3 from 'd3';
 
-export const processGraphDataForD3 = (data, { width, height }) => {
+export const processGraphDataForD3 = (data, { width: _width, height: _height }) => {
     const nodes = [];
     const links = [];
 
@@ -133,7 +133,7 @@ export const createSimulation = (nodes, links, { width, height, data, maxRadius,
 
     // Add sector boundary constraint force (soft corrective - nudges nodes back inside bounds)
     // Using a soft correction avoids hard snapping which causes nodes to "stick" and only slide along boundaries.
-    simulation.force("sectorBoundary", (alpha) => {
+    simulation.force("sectorBoundary", (_alpha) => {
         nodes.forEach(node => {
             // Skip center node
             if (node.type === 'center') {

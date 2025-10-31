@@ -1,6 +1,42 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import yaml from 'js-yaml';
 import styles from './DisplayPanel.module.css';
+
+// A reusable component to handle name edits without losing focus
+function EditableNameInput({ initialValue, onSave, className }) {
+  const [value, setValue] = useState(initialValue);
+
+  useEffect(() => {
+    setValue(initialValue);
+  }, [initialValue]);
+
+  const handleBlur = () => {
+    if (value !== initialValue) {
+      onSave(value);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault(); // prevent form submission if it's in a form
+      if (value !== initialValue) {
+        onSave(value);
+      }
+      e.target.blur(); // remove focus from input
+    }
+  };
+
+  return (
+    <input
+      type="text"
+      value={value}
+      onChange={(e) => setValue(e.target.value)}
+      onBlur={handleBlur}
+      onKeyDown={handleKeyDown}
+      className={className}
+    />
+  );
+}
 
 export default function DisplayPanel({ yamlText, setYamlText }) {
   const data = yaml.load(yamlText) || {};
@@ -18,7 +54,7 @@ export default function DisplayPanel({ yamlText, setYamlText }) {
 
   const handleNameChange = (category, oldName, newName) => {
     const newCategory = { ...displayData[category] };
-    if (newCategory.hasOwnProperty(newName)) {
+    if (Object.prototype.hasOwnProperty.call(newCategory, newName)) {
       // Don't allow renaming to an existing name to prevent data loss
       return;
     }
@@ -78,10 +114,9 @@ export default function DisplayPanel({ yamlText, setYamlText }) {
         <h3>Line Styles</h3>
         {Object.entries(displayData.line_styles || {}).map(([name, style]) => (
           <div key={name} className={styles.item}>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => handleNameChange('line_styles', name, e.target.value)}
+            <EditableNameInput
+              initialValue={name}
+              onSave={(newName) => handleNameChange('line_styles', name, newName)}
               className={styles.nameInput}
             />
             <input
@@ -108,10 +143,9 @@ export default function DisplayPanel({ yamlText, setYamlText }) {
         <h3>Point Styles</h3>
         {Object.entries(displayData.point_styles || {}).map(([name, style]) => (
           <div key={name} className={styles.item}>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => handleNameChange('point_styles', name, e.target.value)}
+            <EditableNameInput
+              initialValue={name}
+              onSave={(newName) => handleNameChange('point_styles', name, newName)}
               className={styles.nameInput}
             />
             <input
@@ -138,10 +172,9 @@ export default function DisplayPanel({ yamlText, setYamlText }) {
         <h3>Colors</h3>
         {Object.entries(displayData.colors || {}).map(([name, color]) => (
           <div key={name} className={styles.item}>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => handleNameChange('colors', name, e.target.value)}
+            <EditableNameInput
+              initialValue={name}
+              onSave={(newName) => handleNameChange('colors', name, newName)}
               className={styles.nameInput}
             />
             <input

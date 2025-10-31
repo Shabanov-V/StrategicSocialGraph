@@ -98,12 +98,12 @@ function InteractivePanel({ yamlText, setYamlText }) {
         setNextId(String(candidateId));
         // also update the form id so the input shows the computed id
         setFormData(prev => ({ ...prev, id: String(candidateId) }));
-      } catch (err) {
+      } catch (_err) {
         // fallback to 1
         setNextId('1');
         setFormData(prev => ({ ...prev, id: '1' }));
       }
-    } catch (err) {
+    } catch (_err) {
       // If YAML can't be parsed, keep sectors empty
       setSectors([]);
       setNextId('1');
@@ -240,7 +240,7 @@ function InteractivePanel({ yamlText, setYamlText }) {
           quality: 'positive',
           color_group: 'friend'
         });
-      } catch (err) {
+      } catch (_err) {
         // fallback reset
         setNextId('1');
         setFormData({

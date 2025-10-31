@@ -9,7 +9,6 @@ export function calculateSectorAngles(data) {
   }
 
   const { sector_distribution, positioning_rules } = data.layout;
-  const { angle_spread } = positioning_rules;
 
   // Group people by sectors
   const sectorGroups = data.people.reduce((acc, person) => {
