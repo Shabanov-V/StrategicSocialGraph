@@ -4,6 +4,7 @@ import D3Graph from './components/D3Graph.jsx';
 import Layout from './components/Layout';
 import InteractivePanel from './components/InteractivePanel';
 import ConnectionEditor from './components/ConnectionEditor.jsx';
+import DisplayPanel from './components/DisplayPanel.jsx';
 import CodePanel from './components/CodePanel';
 import styles from './App.module.css';
 import './App.css';
@@ -74,6 +75,8 @@ function App() {
       return <InteractivePanel yamlText={yamlText} setYamlText={setYamlText} />;
     } else if (selectedPanel === 'connection') {
       return <ConnectionEditor yamlText={yamlText} setYamlText={setYamlText} />;
+    } else if (selectedPanel === 'display') {
+      return <DisplayPanel yamlText={yamlText} setYamlText={setYamlText} />;
     }
     return null;
   }

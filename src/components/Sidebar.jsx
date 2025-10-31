@@ -3,6 +3,7 @@ import styles from './Sidebar.module.css';
 import codeIcon from '../assets/code.svg';
 import formIcon from '../assets/form.svg';
 import connectionIcon from '../assets/connection.svg';
+import displayIcon from '../assets/display.svg';
 
 export default function Sidebar({ isOpen, selectedPanel, setSelectedPanel }) {
 
@@ -43,6 +44,15 @@ export default function Sidebar({ isOpen, selectedPanel, setSelectedPanel }) {
       >
         <span className={styles.icon}>
           <img src={connectionIcon} alt="Toggle connection editor" />
+        </span>
+      </button>
+      <button
+        className={styles.toggleButton}
+        onClick={() => togglePanel('display')}
+        aria-label={isOpen ? 'Hide sidebar' : 'Show sidebar'}
+      >
+        <span className={styles.icon}>
+          <img src={displayIcon} alt="Toggle display settings" />
         </span>
       </button>
     </div>
