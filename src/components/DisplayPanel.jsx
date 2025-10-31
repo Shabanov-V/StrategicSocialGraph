@@ -18,6 +18,10 @@ export default function DisplayPanel({ yamlText, setYamlText }) {
 
   const handleNameChange = (category, oldName, newName) => {
     const newCategory = { ...displayData[category] };
+    if (newCategory.hasOwnProperty(newName)) {
+      // Don't allow renaming to an existing name to prevent data loss
+      return;
+    }
     newCategory[newName] = newCategory[oldName];
     delete newCategory[oldName];
     handleDisplayChange(category, newCategory);
@@ -84,12 +88,12 @@ export default function DisplayPanel({ yamlText, setYamlText }) {
               type="number"
               value={style.width}
               onChange={(e) => handleNestedChange('line_styles', name, 'width', parseInt(e.target.value, 10))}
-              className={styles.valueInput}
+              className={`${styles.valueInput} ${styles.numberInput}`}
             />
             <select
               value={style.style}
               onChange={(e) => handleNestedChange('line_styles', name, 'style', e.target.value)}
-              className={styles.valueInput}
+              className={`${styles.valueInput} ${styles.selectInput}`}
             >
               <option value="solid">Solid</option>
               <option value="dashed">Dashed</option>
@@ -114,12 +118,12 @@ export default function DisplayPanel({ yamlText, setYamlText }) {
               type="number"
               value={style.size}
               onChange={(e) => handleNestedChange('point_styles', name, 'size', parseInt(e.target.value, 10))}
-              className={styles.valueInput}
+              className={`${styles.valueInput} ${styles.numberInput}`}
             />
             <select
               value={style.style}
               onChange={(e) => handleNestedChange('point_styles', name, 'style', e.target.value)}
-              className={styles.valueInput}
+              className={`${styles.valueInput} ${styles.selectInput}`}
             >
               <option value="filled">Filled</option>
               <option value="outline">Outline</option>

@@ -27,12 +27,22 @@
 }
 
 .nameInput {
-  flex: 1;
+  flex-grow: 1;
   margin-right: 0.5rem;
+  min-width: 80px;
 }
 
 .valueInput {
   margin-right: 0.5rem;
+  flex-shrink: 0;
+}
+
+.numberInput {
+  width: 60px;
+}
+
+.selectInput {
+  min-width: 80px;
 }
 
 .deleteButton,
