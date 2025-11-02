@@ -17,7 +17,7 @@
   transition: all 0.3s ease-in-out;
   overflow: auto; /* allow YAML editor content to scroll */
   z-index: 10;
-  background-color: #fff;
+  background-color: var(--white);
   padding: 20px;
   margin: 20px;
   border-radius: 20px;

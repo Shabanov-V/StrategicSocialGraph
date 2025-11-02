@@ -3,7 +3,7 @@
   flex-direction: column;
   height: 100vh;
   font-family: 'Segoe UI', Arial, sans-serif;
-  background-color: #f5f7fa;
+  background-color: var(--off-white);
 }
 
 
@@ -11,7 +11,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  background-color: #ffffff;
+  background-color: var(--white);
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   margin: 16px;
@@ -22,14 +22,14 @@
   flex-grow: 1;
   position: relative;
   padding: 16px;
-  background-color: #ffffff;
+  background-color: var(--white);
   border-radius: 4px;
 }
 
 .errorPanel {
   padding: 16px;
-  background: linear-gradient(to right, #ff6b6b, #ee5253);
-  color: white;
+  background: linear-gradient(to right, var(--error-red), var(--error-red-hover));
+  color: var(--white);
   white-space: pre-wrap;
   word-break: break-word;
   max-height: 200px;

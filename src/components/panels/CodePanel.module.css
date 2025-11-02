@@ -1,4 +1,4 @@
-@import 'common/styles.module.css';
+@import '../common/styles.module.css';
 
 .toolbar {
   display: flex;

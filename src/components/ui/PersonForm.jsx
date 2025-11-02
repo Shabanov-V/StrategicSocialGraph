@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './InteractivePanel.module.css';
+import styles from '../common/styles.module.css';
 
 function PersonForm({ formData, sectors, colorGroups, handleChange, handleSubmit, buttonText }) {
   return (

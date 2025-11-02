@@ -1,3 +1,16 @@
+:root {
+  --primary-blue: #007bff;
+  --primary-blue-hover: #0056b3;
+  --light-gray: #f0f0f0;
+  --medium-gray: #ccc;
+  --dark-gray: #666;
+  --very-dark-gray: #333;
+  --white: #fff;
+  --off-white: #f5f7fa;
+  --error-red: #ff6b6b;
+  --error-red-hover: #ee5253;
+}
+
 /* Resetting default styles */
 html, body, #root {
   margin: 0;

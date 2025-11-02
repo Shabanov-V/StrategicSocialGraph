@@ -1,8 +1,8 @@
 import React from 'react';
 import styles from './Sidebar.module.css';
-import codeIcon from '../assets/code.svg';
-import formIcon from '../assets/form.svg';
-import connectionIcon from '../assets/connection.svg';
+import codeIcon from '../../assets/code.svg';
+import formIcon from '../../assets/form.svg';
+import connectionIcon from '../../assets/connection.svg';
 
 export default function Sidebar({ isOpen, selectedPanel, setSelectedPanel }) {
 

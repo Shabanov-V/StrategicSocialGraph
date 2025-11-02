@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import * as d3 from 'd3';
-import { processGraphDataForD3, createSimulation, getD3Style, constrainToSector } from '../utils/d3-helper';
+import { processGraphDataForD3, createSimulation, getD3Style, constrainToSector } from '../../utils/d3-helper';
 import styles from './D3Graph.module.css';
 
 const D3Graph = ({ graphData }) => {
@@ -45,7 +45,7 @@ const D3Graph = ({ graphData }) => {
                 .attr("cy", height / 2)
                 .attr("r", radius)
                 .attr("fill", "none")
-                .attr("stroke", "#ccc")
+                .attr("stroke", "var(--medium-gray)")
                 .attr("stroke-width", 2)
                 .attr("stroke-dasharray", "5,5")
                 .attr("class", `circle-${i + 1}`);
@@ -69,7 +69,7 @@ const D3Graph = ({ graphData }) => {
                     endAngle
                 }))
                 .attr("transform", `translate(${width/2},${height/2})`)
-                .attr("fill", "#f8f8f8")
+                .attr("fill", "var(--light-gray)")
                 .attr("stroke", "none")
                 .attr("opacity", 0.3);
 
@@ -80,7 +80,7 @@ const D3Graph = ({ graphData }) => {
                     endAngle: startAngle
                 }))
                 .attr("transform", `translate(${width/2},${height/2})`)
-                .attr("stroke", "#666")
+                .attr("stroke", "var(--dark-gray)")
                 .attr("stroke-width", 2)
                 .attr("fill", "none");
 
@@ -94,7 +94,7 @@ const D3Graph = ({ graphData }) => {
                 .attr("y", labelY)
                 .attr("text-anchor", "middle")
                 .attr("dominant-baseline", "middle")
-                .attr("fill", "#666")
+                .attr("fill", "var(--dark-gray)")
                 .attr("font-size", "14px")
                 .attr("class", "sector-label")
                 .text(sector.name);
@@ -104,7 +104,7 @@ const D3Graph = ({ graphData }) => {
                 .attr("y", labelY + 20)
                 .attr("text-anchor", "middle")
                 .attr("dominant-baseline", "middle")
-                .attr("fill", "#999")
+                .attr("fill", "var(--medium-gray)")
                 .attr("font-size", "12px")
                 .text(`(${sector.peopleCount})`);
         });
@@ -147,7 +147,7 @@ const D3Graph = ({ graphData }) => {
             .attr('x', 12)
             .attr('y', 4)
             .attr("font-size", "12px")
-            .attr("fill", "#333");
+            .attr("fill", "var(--very-dark-gray)");
 
         simulation.on("tick", () => {
             link

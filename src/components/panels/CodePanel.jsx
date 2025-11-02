@@ -1,5 +1,5 @@
 import React from 'react';
-import Editor from './Editor';
+import Editor from '../ui/Editor';
 import styles from './CodePanel.module.css';
 
 function CodePanel({ value, onChange, error }) {

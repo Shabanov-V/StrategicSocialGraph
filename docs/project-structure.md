@@ -24,7 +24,12 @@ This document provides an overview of the files and directories in the social gr
 ## `/src` Directory
 
 -   `/src/assets`: Contains static assets like images and fonts.
--   `/src/components`: Contains the React components for the application.
+-   `/src/components`: Contains the React components for the application, organized into the following subdirectories:
+    -   `/src/components/common`: Contains shared styles and an error boundary component.
+    -   `/src/components/layouts`: Contains components that define the layout of the application.
+    -   `/src/components/panels`: Contains the main panel components for the application.
+    -   `/src/components/ui`: Contains reusable UI components.
+    -   `/src/components/view`: Contains the main view components for the application.
 -   `/src/utils`: Contains utility functions that are used throughout the application.
 -   `/src/App.css`: Global CSS styles for the application.
 -   `/src/App.jsx`: The main application component.

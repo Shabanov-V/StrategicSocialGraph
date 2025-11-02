@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import yaml from 'js-yaml';
-import styles from './InteractivePanel.module.css';
+import styles from '../common/styles.module.css';
 
 function ConnectionEditor({ yamlText, setYamlText }) {
   const [formData, setFormData] = useState({

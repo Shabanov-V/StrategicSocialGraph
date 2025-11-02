@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import yaml from 'js-yaml';
-import D3Graph from './components/D3Graph.jsx';
-import Layout from './components/Layout';
-import InteractivePanel from './components/InteractivePanel';
-import ConnectionEditor from './components/ConnectionEditor.jsx';
-import CodePanel from './components/CodePanel';
+import D3Graph from './components/view/D3Graph.jsx';
+import Layout from './components/layouts/Layout.jsx';
+import InteractivePanel from './components/panels/InteractivePanel.jsx';
+import ConnectionEditor from './components/panels/ConnectionEditor.jsx';
+import CodePanel from './components/panels/CodePanel.jsx';
 import styles from './App.module.css';
 import './App.css';
 import { calculateSectorAngles } from './utils/layout-helper.js';
