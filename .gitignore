@@ -23,3 +23,6 @@ private
 *.njsproj
 *.sln
 *.sw?
+
+redeploy.sh
+docker-compose.yml

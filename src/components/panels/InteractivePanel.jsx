@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import yaml from 'js-yaml';
+import Select from 'react-select';
 import styles from '../common/styles.module.css';
 import PersonForm from '../ui/PersonForm';
 
@@ -263,6 +264,8 @@ function InteractivePanel({ yamlText, setYamlText }) {
     }
   };
 
+  const peopleOptions = people.map(p => ({ value: p.id, label: p.name }));
+
   return (
     <div className={styles.panel}>
       <div className={styles.tabs}>
@@ -295,17 +298,15 @@ function InteractivePanel({ yamlText, setYamlText }) {
         <div>
           <div className={styles.formGroup}>
             <label htmlFor="person">Person:</label>
-            <select
-              id="person"
+            <Select
+              inputId="person"
               name="person"
-              value={selectedPerson}
-              onChange={e => setSelectedPerson(e.target.value)}
-            >
-              <option value="">-- select person --</option>
-              {people.map(p => (
-                <option key={p.id} value={p.id}>{p.name}</option>
-              ))}
-            </select>
+              options={peopleOptions}
+              value={peopleOptions.find(o => String(o.value) === String(selectedPerson)) || null}
+              onChange={opt => setSelectedPerson(opt ? opt.value : '')}
+              isClearable
+              placeholder="-- select person --"
+            />
           </div>
 
           {selectedPerson && (

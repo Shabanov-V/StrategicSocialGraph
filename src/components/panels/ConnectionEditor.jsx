@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import yaml from 'js-yaml';
+import Select from 'react-select';
 import styles from '../common/styles.module.css';
 
 function ConnectionEditor({ yamlText, setYamlText }) {
@@ -196,6 +197,8 @@ function ConnectionEditor({ yamlText, setYamlText }) {
     }
   }, [editFrom, editTo, yamlText]);
 
+  const peopleOptions = people.map(p => ({ value: p.name, label: p.name }));
+
   return (
     <div className={styles.panel}>
       <div className={styles.tabs}>
@@ -217,34 +220,28 @@ function ConnectionEditor({ yamlText, setYamlText }) {
         <form className={styles.form} onSubmit={handleSubmit}>
           <div className={styles.formGroup}>
             <label htmlFor="from">From Person:</label>
-            <select
-              id="from"
+            <Select
+              inputId="from"
               name="from"
-              value={formData.from}
-              onChange={handleChange}
-              required
-            >
-              <option value="">-- select person --</option>
-              {people.map(person => (
-                <option key={person.id} value={person.name}>{person.name}</option>
-              ))}
-            </select>
+              options={peopleOptions}
+              value={peopleOptions.find(o => o.value === formData.from) || null}
+              onChange={opt => handleChange({ target: { name: 'from', value: opt ? opt.value : '' } })}
+              isClearable
+              placeholder="-- select person --"
+            />
           </div>
 
           <div className={styles.formGroup}>
             <label htmlFor="to">To Person:</label>
-            <select
-              id="to"
+            <Select
+              inputId="to"
               name="to"
-              value={formData.to}
-              onChange={handleChange}
-              required
-            >
-              <option value="">-- select person --</option>
-              {people.map(person => (
-                <option key={person.id} value={person.name}>{person.name}</option>
-              ))}
-            </select>
+              options={peopleOptions}
+              value={peopleOptions.find(o => o.value === formData.to) || null}
+              onChange={opt => handleChange({ target: { name: 'to', value: opt ? opt.value : '' } })}
+              isClearable
+              placeholder="-- select person --"
+            />
           </div>
 
           <div className={styles.formGroup}>
@@ -315,31 +312,27 @@ function ConnectionEditor({ yamlText, setYamlText }) {
         <div>
           <div className={styles.formGroup}>
             <label htmlFor="editFrom">Person 1:</label>
-            <select
-              id="editFrom"
+            <Select
+              inputId="editFrom"
               name="editFrom"
-              value={editFrom}
-              onChange={e => setEditFrom(e.target.value)}
-            >
-              <option value="">-- select person --</option>
-              {people.map(p => (
-                <option key={p.id} value={p.name}>{p.name}</option>
-              ))}
-            </select>
+              options={peopleOptions}
+              value={peopleOptions.find(o => o.value === editFrom) || null}
+              onChange={opt => setEditFrom(opt ? opt.value : '')}
+              isClearable
+              placeholder="-- select person --"
+            />
           </div>
           <div className={styles.formGroup}>
             <label htmlFor="editTo">Person 2:</label>
-            <select
-              id="editTo"
+            <Select
+              inputId="editTo"
               name="editTo"
-              value={editTo}
-              onChange={e => setEditTo(e.target.value)}
-            >
-              <option value="">-- select person --</option>
-              {people.map(p => (
-                <option key={p.id} value={p.name}>{p.name}</option>
-              ))}
-            </select>
+              options={peopleOptions}
+              value={peopleOptions.find(o => o.value === editTo) || null}
+              onChange={opt => setEditTo(opt ? opt.value : '')}
+              isClearable
+              placeholder="-- select person --"
+            />
           </div>
           {selectedConnection && (
             <form className={styles.form}>
