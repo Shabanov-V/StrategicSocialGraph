@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import styles from './Layout.module.css';
 import Sidebar from './Sidebar';
 
-const Layout = ({ left, right, setSelectedPanel, selectedPanel }) => {
+const Layout = ({ left, right, setSelectedPanel, selectedPanel, authSlot }) => {
   const isSidebarOpen = selectedPanel !== null;
   return (
     <div className={styles.layout}>
-      <Sidebar isOpen={isSidebarOpen} selectedPanel={selectedPanel} setSelectedPanel={setSelectedPanel} />
+      <Sidebar isOpen={isSidebarOpen} selectedPanel={selectedPanel} setSelectedPanel={setSelectedPanel} authSlot={authSlot} />
       <div className={`${styles.leftPanel} ${isSidebarOpen ? '' : styles.hidden}`}>
         {left}
       </div>

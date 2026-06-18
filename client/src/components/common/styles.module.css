@@ -71,3 +71,22 @@
 .submitButton:hover {
   background-color: var(--primary-blue-hover);
 }
+
+.deleteButton {
+  background-color: #dc3545; /* Bootstrap-like red */
+  margin-top: 0.5rem;
+}
+
+.deleteButton:hover {
+  background-color: #c82333;
+}
+
+.deleteAllButton {
+  background-color: #dc3545;
+  margin-top: 2rem;
+  font-weight: bold;
+}
+
+.deleteAllButton:hover {
+  background-color: #c82333;
+}

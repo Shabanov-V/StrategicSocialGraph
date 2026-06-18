@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from '../common/styles.module.css';
 
-function PersonForm({ formData, sectors, colorGroups, handleChange, handleSubmit, buttonText }) {
+function PersonForm({ formData, sectors, colorGroups, handleChange, handleSubmit, buttonText, onDelete }) {
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
       <div className={styles.formGroup}>
@@ -138,6 +138,11 @@ function PersonForm({ formData, sectors, colorGroups, handleChange, handleSubmit
       <button type="submit" className={styles.submitButton}>
         {buttonText}
       </button>
+      {onDelete && (
+        <button type="button" className={`${styles.submitButton} ${styles.deleteButton}`} onClick={onDelete}>
+          Delete Person
+        </button>
+      )}
     </form>
   );
 }

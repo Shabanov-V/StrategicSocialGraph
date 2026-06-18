@@ -57,8 +57,18 @@ function InteractivePanel({ yamlText, setYamlText }) {
         }
       });
 
+      // Also include sectors defined in layout configuration
+      if (data.layout && data.layout.sector_distribution) {
+        Object.keys(data.layout.sector_distribution).forEach(s => {
+          if (s && typeof s === 'string') {
+            const trimmed = s.trim();
+            if (trimmed) list.push(trimmed);
+          }
+        });
+      }
+
       // dedupe and sort
-      const unique = Array.from(new Set(list)).sort((a, b) => a.localeCompare(b));
+      const unique = Array.from(new Set(list)).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
       setSectors(unique);
 
       const newColorGroups = (data && data.display && data.display.colors) || {};
@@ -137,6 +147,74 @@ function InteractivePanel({ yamlText, setYamlText }) {
       });
     }
   }, [selectedPerson, people, nextId]);
+
+  const handleDelete = () => {
+    if (!selectedPerson) return;
+    const personToDelete = people.find(p => p.id === parseInt(selectedPerson));
+    if (!personToDelete) return;
+
+    if (!window.confirm(`Are you sure you want to delete ${personToDelete.name}? This will also remove all their connections.`)) {
+      return;
+    }
+
+    try {
+      const currentData = yaml.load(yamlText) || {};
+      const personName = personToDelete.name;
+
+      // Filter out the person
+      if (Array.isArray(currentData.people)) {
+        currentData.people = currentData.people.filter(p => p.id !== personToDelete.id);
+      }
+      if (Array.isArray(currentData.nodes)) {
+        currentData.nodes = currentData.nodes.filter(p => p.id !== personToDelete.id);
+      }
+
+      // Filter out connections involving this person's name
+      if (Array.isArray(currentData.peer_connections)) {
+        currentData.peer_connections = currentData.peer_connections.filter(
+          c => c.from !== personName && c.to !== personName
+        );
+      }
+
+      const updatedYaml = yaml.dump(currentData, {
+        indent: 2,
+        lineWidth: -1
+      });
+
+      setYamlText(updatedYaml);
+      setSelectedPerson('');
+    } catch (error) {
+      console.error('Error deleting person:', error);
+    }
+  };
+
+  const handleDeleteAll = () => {
+    if (!window.confirm("Are you sure you want to delete ALL persons? This will also remove all connections and cannot be undone.")) {
+      return;
+    }
+
+    try {
+      const currentData = yaml.load(yamlText) || {};
+
+      // Clear people and nodes
+      currentData.people = [];
+      currentData.nodes = [];
+
+      // Clear peer connections as they depend on people
+      currentData.peer_connections = [];
+
+      const updatedYaml = yaml.dump(currentData, {
+        indent: 2,
+        lineWidth: -1
+      });
+
+      setYamlText(updatedYaml);
+      setSelectedPerson('');
+      console.log('All persons and connections deleted successfully');
+    } catch (error) {
+      console.error('Error deleting all persons:', error);
+    }
+  };
 
   const handleEditSubmit = (e) => {
     e.preventDefault();
@@ -317,8 +395,17 @@ function InteractivePanel({ yamlText, setYamlText }) {
               handleChange={handleChange}
               handleSubmit={handleEditSubmit}
               buttonText="Save Changes"
+              onDelete={handleDelete}
             />
           )}
+
+          <button
+            type="button"
+            className={`${styles.submitButton} ${styles.deleteAllButton}`}
+            onClick={handleDeleteAll}
+          >
+            Delete All Persons
+          </button>
         </div>
       )}
     </div>

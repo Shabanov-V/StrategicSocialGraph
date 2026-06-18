@@ -1,0 +1,27 @@
+.status {
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  text-align: center;
+  margin: 4px 8px;
+}
+
+.saving {
+  color: var(--dark-gray);
+  background: var(--light-gray);
+}
+
+.saved {
+  color: #2d7d46;
+  background: #e6f4ea;
+}
+
+.error {
+  color: var(--error-red);
+  background: #ffeaea;
+}
+
+.offline {
+  color: #b8860b;
+  background: #fff8dc;
+}

@@ -1,27 +1,45 @@
-# Build stage
-FROM node:20-slim as build
+# Build client
+FROM node:20-slim AS client-build
 
-WORKDIR /app
-COPY package*.json ./
+ARG VITE_GOOGLE_CLIENT_ID
+ENV VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID
 
-# Install dependencies
+WORKDIR /app/client
+COPY client/package*.json ./
 RUN npm install
-
-# Copy source code
-COPY . .
-
-# Build the application
+COPY client/ .
 RUN npm run build
 
-# Production stage
-FROM nginx:alpine
+# Build server
+FROM node:20-slim AS server-build
 
-# Copy built assets from build stage
-COPY --from=build /app/dist /usr/share/nginx/html
+WORKDIR /app/server
+COPY server/package*.json ./
+RUN npm install
+COPY server/ .
+RUN npm run build
 
-# Copy nginx configuration if needed
-# COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Production: Nginx + Node
+FROM node:20-slim
+
+RUN apt-get update && apt-get install -y nginx && rm -rf /var/lib/apt/lists/* \
+    && rm -f /etc/nginx/sites-enabled/default
+
+# Copy built client to nginx
+COPY --from=client-build /app/client/dist /usr/share/nginx/html
+
+# Copy nginx config
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Copy server
+WORKDIR /app/server
+COPY --from=server-build /app/server/dist ./dist
+COPY --from=server-build /app/server/node_modules ./node_modules
+COPY --from=server-build /app/server/package.json .
 
 EXPOSE 80
 
-CMD ["nginx", "-g", "daemon off;"]
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+CMD ["/entrypoint.sh"]
