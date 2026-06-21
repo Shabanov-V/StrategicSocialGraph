@@ -44,6 +44,7 @@ This project has detailed documentation to help you understand how it works and 
 -   **[YAML Data Format](docs/yaml-data-format.md)**: A detailed explanation of the YAML file format with examples.
 -   **[D3.js Visualization Logic](docs/visualization.md)**: An explanation of how the D3.js visualization works.
 -   **[React Components](docs/components.md)**: A description of the React components used in the application.
+-   **[Deployment](docs/deployment.md)**: How to build and deploy the app with Docker Compose.
 
 ## Contributing
 
