@@ -1,39 +1,33 @@
-import React, { useState, useEffect } from 'react';
-import yaml from 'js-yaml';
+import React, { useState } from 'react';
 import styles from '../common/styles.module.css';
+import { read, getIn, setIn, deleteIn } from '../../graph-document';
 
-
-const DynamicMap = ({ label, path, data, commitChanges, styles, keyType = 'string', valType = 'string' }) => {
-  let mapObj = {};
+// Read the subtree at `path` from the rendered plain-object view.
+const at = (data, path) => {
   let current = data;
   path.forEach(p => {
     if (current && current[p]) current = current[p];
     else current = null;
   });
-  if (current && typeof current === 'object' && !Array.isArray(current)) {
-    mapObj = current;
-  }
+  return current;
+};
 
+const DynamicMap = ({ label, path, data, yamlText, setYamlText, styles, keyType = 'string', valType = 'string' }) => {
+  const current = at(data, path);
+  const mapObj = current && typeof current === 'object' && !Array.isArray(current) ? current : {};
   const entries = Object.entries(mapObj);
 
   const updateMap = (oldKey, newKey, value) => {
-    const newData = { ...data };
-    let curr = newData;
-    path.forEach(p => {
-       if (!curr[p]) curr[p] = {};
-       curr = curr[p];
-    });
-    if (oldKey !== newKey) {
-      delete curr[oldKey];
-    }
-    if (value !== null) {
-       let finalKey = keyType === 'number' && !isNaN(newKey) && String(newKey).trim() !== '' ? Number(newKey) : newKey;
-       let finalValue = valType === 'number' && !isNaN(value) && String(value).trim() !== '' ? Number(value) : value;
-       curr[finalKey] = finalValue;
+    let next = yamlText;
+    if (value === null) {
+      next = deleteIn(next, [...path, newKey]);
     } else {
-      delete curr[newKey];
+      const finalKey = keyType === 'number' && !isNaN(newKey) && String(newKey).trim() !== '' ? Number(newKey) : newKey;
+      const finalValue = valType === 'number' && !isNaN(value) && String(value).trim() !== '' ? Number(value) : value;
+      if (oldKey !== '' && oldKey !== finalKey) next = deleteIn(next, [...path, oldKey]);
+      next = setIn(next, [...path, finalKey], finalValue);
     }
-    commitChanges(newData);
+    setYamlText(next);
   };
 
   const addEntry = () => {
@@ -52,18 +46,18 @@ const DynamicMap = ({ label, path, data, commitChanges, styles, keyType = 'strin
       <label>{label}</label>
       {entries.map(([k, v], idx) => (
         <div key={idx} style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
-          <input 
-            value={k} 
-            onChange={e => updateMap(k, e.target.value, v)} 
-            placeholder="Key" 
-            style={{ width: '40%', boxSizing: 'border-box' }} 
+          <input
+            value={k}
+            onChange={e => updateMap(k, e.target.value, v)}
+            placeholder="Key"
+            style={{ width: '40%', boxSizing: 'border-box' }}
           />
-          <input 
+          <input
             type={valType === 'number' ? 'number' : 'text'}
-            value={v} 
-            onChange={e => updateMap(k, k, e.target.value)} 
-            placeholder="Value" 
-            style={{ width: '40%', boxSizing: 'border-box' }} 
+            value={v}
+            onChange={e => updateMap(k, k, e.target.value)}
+            placeholder="Value"
+            style={{ width: '40%', boxSizing: 'border-box' }}
           />
           <button type="button" onClick={() => updateMap(k, k, null)}>X</button>
         </div>
@@ -73,24 +67,12 @@ const DynamicMap = ({ label, path, data, commitChanges, styles, keyType = 'strin
   );
 };
 
-const DynamicArray = ({ label, path, data, commitChanges, styles }) => {
-  let arr = [];
-  let current = data;
-  path.forEach(p => {
-    if (current && current[p]) current = current[p];
-    else current = null;
-  });
-  if (Array.isArray(current)) arr = current;
+const DynamicArray = ({ label, path, data, yamlText, setYamlText, styles }) => {
+  const current = at(data, path);
+  const arr = Array.isArray(current) ? current : [];
 
   const updateArray = (newArr) => {
-    const newData = { ...data };
-    let curr = newData;
-    path.slice(0, -1).forEach(p => {
-       if (!curr[p]) curr[p] = {};
-       curr = curr[p];
-    });
-    curr[path[path.length - 1]] = newArr;
-    commitChanges(newData);
+    setYamlText(setIn(yamlText, path, newArr));
   };
 
   return (
@@ -98,8 +80,8 @@ const DynamicArray = ({ label, path, data, commitChanges, styles }) => {
       <label>{label}</label>
       {arr.map((item, idx) => (
         <div key={idx} style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
-          <input 
-            value={item} 
+          <input
+            value={item}
             onChange={e => {
               const copy = [...arr];
               copy[idx] = e.target.value;
@@ -119,33 +101,20 @@ const DynamicArray = ({ label, path, data, commitChanges, styles }) => {
   );
 };
 
-const DynamicStyleMap = ({ label, path, fields, data, commitChanges, styles }) => {
-  let mapObj = {};
-  let current = data;
-  path.forEach(p => {
-    if (current && current[p]) current = current[p];
-    else current = null;
-  });
-  if (current && typeof current === 'object' && !Array.isArray(current)) {
-    mapObj = current;
-  }
-
+const DynamicStyleMap = ({ label, path, fields, data, yamlText, setYamlText, styles }) => {
+  const current = at(data, path);
+  const mapObj = current && typeof current === 'object' && !Array.isArray(current) ? current : {};
   const entries = Object.entries(mapObj);
 
   const updateEntry = (oldKey, newKey, newObj) => {
-    const newData = { ...data };
-    let curr = newData;
-    path.forEach(p => {
-       if (!curr[p]) curr[p] = {};
-       curr = curr[p];
-    });
-    if (oldKey !== newKey) delete curr[oldKey];
-    if (newObj !== null) {
-      curr[newKey] = newObj;
+    let next = yamlText;
+    if (newObj === null) {
+      next = deleteIn(next, [...path, newKey]);
     } else {
-      delete curr[newKey];
+      if (oldKey !== '' && oldKey !== newKey) next = deleteIn(next, [...path, oldKey]);
+      next = setIn(next, [...path, newKey], newObj);
     }
-    commitChanges(newData);
+    setYamlText(next);
   };
 
   const addStyle = () => {
@@ -172,10 +141,10 @@ const DynamicStyleMap = ({ label, path, fields, data, commitChanges, styles }) =
           {fields.map(f => (
             <div key={f.name} style={{ display: 'flex', gap: '8px', paddingLeft: '8px' }}>
                <label style={{ width: '60px', alignSelf: 'center', margin: 0, fontSize: '0.9em', color: '#555' }}>{f.name}</label>
-               <input 
+               <input
                  type={f.type === 'number' ? 'number' : 'text'}
-                 value={v[f.name] || ''} 
-                 onChange={e => updateEntry(k, k, { ...v, [f.name]: f.type === 'number' ? Number(e.target.value) : e.target.value })} 
+                 value={v[f.name] || ''}
+                 onChange={e => updateEntry(k, k, { ...v, [f.name]: f.type === 'number' ? Number(e.target.value) : e.target.value })}
                  style={{ boxSizing: 'border-box' }}
                />
             </div>
@@ -189,65 +158,30 @@ const DynamicStyleMap = ({ label, path, fields, data, commitChanges, styles }) =
 
 function ConfigEditor({ yamlText, setYamlText }) {
   const [activeTab, setActiveTab] = useState('general');
-  const [data, setData] = useState({});
 
-  useEffect(() => {
-    try {
-      const parsed = yaml.load(yamlText) || {};
-      setData(parsed);
-    } catch (err) {
-      console.error(err);
-    }
-  }, [yamlText]);
-
-  const commitChanges = (newData) => {
-    setData(newData);
-    try {
-      const updatedYaml = yaml.dump(newData, { indent: 2, lineWidth: -1 });
-      setYamlText(updatedYaml);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  // Plain-object view for rendering; mutations go through path ops on the string.
+  let data = {};
+  try {
+    data = read(yamlText);
+  } catch {
+    data = {};
+  }
 
   const handleStringChange = (path, value) => {
-    const newData = { ...data };
-    let current = newData;
-    path.slice(0, -1).forEach(p => {
-      if (!current[p]) current[p] = {};
-      current = current[p];
-    });
-    const last = path[path.length - 1];
-    if (value === '') {
-      delete current[last];
-    } else {
-      current[last] = value;
-    }
-    commitChanges(newData);
+    setYamlText(value === '' ? deleteIn(yamlText, path) : setIn(yamlText, path, value));
   };
-  
+
   const handleNumberChange = (path, value) => {
     handleStringChange(path, Number(value));
   };
-  
+
   const handleCheckboxChange = (path, value) => {
-    const newData = { ...data };
-    let current = newData;
-    path.slice(0, -1).forEach(p => {
-      if (!current[p]) current[p] = {};
-      current = current[p];
-    });
-    current[path[path.length - 1]] = value;
-    commitChanges(newData);
+    setYamlText(setIn(yamlText, path, value));
   };
 
   const getVal = (path) => {
-    let curr = data;
-    for (let p of path) {
-      if (curr && curr[p] !== undefined) curr = curr[p];
-      else return '';
-    }
-    return curr;
+    const v = getIn(yamlText, path);
+    return v === undefined ? '' : v;
   };
 
   return (
@@ -276,13 +210,13 @@ function ConfigEditor({ yamlText, setYamlText }) {
                 </div>
               );
             })()}
-            <DynamicMap label="Sector Distribution (Sector: Angle)" path={['layout', 'sector_distribution']} data={data} commitChanges={commitChanges} styles={styles} keyType="string" valType="number" />
+            <DynamicMap label="Sector Distribution (Sector: Angle)" path={['layout', 'sector_distribution']} data={data} yamlText={yamlText} setYamlText={setYamlText} styles={styles} keyType="string" valType="number" />
             <div className={styles.formGroup} style={{ boxSizing: 'border-box', width: '100%' }}>
                <label>Angle Spread</label>
                <input style={{ boxSizing: 'border-box', width: '100%' }} type="number" value={getVal(['layout', 'positioning_rules', 'angle_spread'])} onChange={e => handleNumberChange(['layout', 'positioning_rules', 'angle_spread'], e.target.value)} />
             </div>
-            <DynamicArray label="Sort By" path={['layout', 'positioning_rules', 'sort_by']} data={data} commitChanges={commitChanges} styles={styles} />
-            <DynamicMap label="Circle Radius (Circle Level: Radius)" path={['layout', 'positioning_rules', 'circle_radius']} data={data} commitChanges={commitChanges} styles={styles} keyType="number" valType="number" />
+            <DynamicArray label="Sort By" path={['layout', 'positioning_rules', 'sort_by']} data={data} yamlText={yamlText} setYamlText={setYamlText} styles={styles} />
+            <DynamicMap label="Circle Radius (Circle Level: Radius)" path={['layout', 'positioning_rules', 'circle_radius']} data={data} yamlText={yamlText} setYamlText={setYamlText} styles={styles} keyType="number" valType="number" />
           </div>
         )}
         {activeTab === 'display' && (
@@ -299,9 +233,9 @@ function ConfigEditor({ yamlText, setYamlText }) {
                  Show Circles
                </label>
             </div>
-            <DynamicMap label="Colors (Name: Hex/Color)" path={['display', 'colors']} data={data} commitChanges={commitChanges} styles={styles} />
-            <DynamicStyleMap label="Line Styles" path={['display', 'line_styles']} fields={[{name: 'width', type: 'number'}, {name: 'style', type: 'text'}]} data={data} commitChanges={commitChanges} styles={styles} />
-            <DynamicStyleMap label="Point Styles" path={['display', 'point_styles']} fields={[{name: 'size', type: 'number'}, {name: 'style', type: 'text'}]} data={data} commitChanges={commitChanges} styles={styles} />
+            <DynamicMap label="Colors (Name: Hex/Color)" path={['display', 'colors']} data={data} yamlText={yamlText} setYamlText={setYamlText} styles={styles} />
+            <DynamicStyleMap label="Line Styles" path={['display', 'line_styles']} fields={[{name: 'width', type: 'number'}, {name: 'style', type: 'text'}]} data={data} yamlText={yamlText} setYamlText={setYamlText} styles={styles} />
+            <DynamicStyleMap label="Point Styles" path={['display', 'point_styles']} fields={[{name: 'size', type: 'number'}, {name: 'style', type: 'text'}]} data={data} yamlText={yamlText} setYamlText={setYamlText} styles={styles} />
           </div>
         )}
       </div>
