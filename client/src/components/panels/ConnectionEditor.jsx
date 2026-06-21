@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import yaml from 'js-yaml';
 import Select from 'react-select';
 import styles from '../common/styles.module.css';
+import {
+  listPeople,
+  listConnections,
+  getIn,
+  addConnection,
+  editConnection,
+  removeConnection,
+} from '../../graph-document';
 
 function ConnectionEditor({ yamlText, setYamlText }) {
   const [formData, setFormData] = useState({
@@ -19,19 +26,9 @@ function ConnectionEditor({ yamlText, setYamlText }) {
   // Load people list from YAML
   useEffect(() => {
     try {
-      const data = yaml.load(yamlText) || {};
-      const peopleList = [];
-      
-      // Check both people and nodes arrays for compatibility
-      if (Array.isArray(data.people)) {
-        peopleList.push(...data.people);
-      } else if (Array.isArray(data.nodes)) {
-        peopleList.push(...data.nodes);
-      }
-      
-      setPeople(peopleList);
+      setPeople(listPeople(yamlText));
 
-      const newColorGroups = (data && data.display && data.display.colors) || {};
+      const newColorGroups = getIn(yamlText, ['display', 'colors']) || {};
       setColorGroups(newColorGroups);
 
       setFormData(prev => {
@@ -65,16 +62,6 @@ function ConnectionEditor({ yamlText, setYamlText }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     try {
-      const currentData = yaml.load(yamlText) || {};
-      
-      console.log('Current Data before adding connection:', currentData);
-
-      // Initialize connections array if it doesn't exist
-      if (!Array.isArray(currentData.peer_connections)) {
-        currentData.peer_connections = [];
-      }
-
-      // Add new connection
       const newConnection = {
         from: formData.from,
         to: formData.to,
@@ -84,16 +71,7 @@ function ConnectionEditor({ yamlText, setYamlText }) {
         color_group: formData.color_group
       };
 
-      currentData.peer_connections.push(newConnection);
-
-      // Convert back to YAML
-      const updatedYaml = yaml.dump(currentData, {
-        indent: 2,
-        lineWidth: -1 // Prevent line wrapping
-      });
-
-      // Update the YAML text
-      setYamlText(updatedYaml);
+      setYamlText(addConnection(yamlText, newConnection));
 
       // Reset form
       setFormData({
@@ -104,8 +82,6 @@ function ConnectionEditor({ yamlText, setYamlText }) {
         quality: 'positive',
         color_group: 'friend'
       });
-
-      console.log('Connection added successfully');
     } catch (error) {
       console.error('Error updating YAML:', error);
     }
@@ -118,21 +94,7 @@ function ConnectionEditor({ yamlText, setYamlText }) {
 
   const handleDelete = () => {
     try {
-      const currentData = yaml.load(yamlText) || {};
-      let connections = currentData.peer_connections || [];
-      connections = connections.filter(
-        c =>
-          !(
-            (c.from === editFrom && c.to === editTo) ||
-            (c.from === editTo && c.to === editFrom)
-          )
-      );
-      currentData.peer_connections = connections;
-      const updatedYaml = yaml.dump(currentData, {
-        indent: 2,
-        lineWidth: -1,
-      });
-      setYamlText(updatedYaml);
+      setYamlText(removeConnection(yamlText, editFrom, editTo));
       setEditFrom('');
       setEditTo('');
     } catch (error) {
@@ -143,25 +105,7 @@ function ConnectionEditor({ yamlText, setYamlText }) {
   const handleEditSubmit = (e) => {
     e.preventDefault();
     try {
-      const currentData = yaml.load(yamlText) || {};
-      const connections = currentData.peer_connections || [];
-      const index = connections.findIndex(
-        c =>
-          (c.from === editFrom && c.to === editTo) ||
-          (c.from === editTo && c.to === editFrom)
-      );
-      if (index !== -1) {
-        connections[index] = {
-          ...connections[index],
-          ...formData,
-        };
-        currentData.peer_connections = connections;
-        const updatedYaml = yaml.dump(currentData, {
-          indent: 2,
-          lineWidth: -1,
-        });
-        setYamlText(updatedYaml);
-      }
+      setYamlText(editConnection(yamlText, editFrom, editTo, formData));
     } catch (error) {
       console.error('Error updating YAML:', error);
     }
@@ -178,9 +122,7 @@ function ConnectionEditor({ yamlText, setYamlText }) {
   useEffect(() => {
     if (editFrom && editTo) {
       try {
-        const data = yaml.load(yamlText) || {};
-        const connections = data.peer_connections || [];
-        const connection = connections.find(
+        const connection = listConnections(yamlText).find(
           c =>
             (c.from === editFrom && c.to === editTo) ||
             (c.from === editTo && c.to === editFrom)

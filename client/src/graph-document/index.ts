@@ -44,6 +44,26 @@ export function addConnection(yamlText: string, connection: Connection): string 
   return serialize(doc);
 }
 
+/** Merge a patch into the peer connection between two people (either direction). No-op if none matches. */
+export function editConnection(
+  yamlText: string,
+  a: string,
+  b: string,
+  patch: Partial<Connection>,
+): string {
+  const connections = listConnections(yamlText);
+  const index = connections.findIndex(
+    (c) => (c.from === a && c.to === b) || (c.from === b && c.to === a),
+  );
+  if (index === -1) return yamlText;
+
+  const doc = parse(yamlText);
+  for (const [key, value] of Object.entries(patch)) {
+    doc.setIn(['peer_connections', index, key], value);
+  }
+  return serialize(doc);
+}
+
 /** Remove the peer connection between two people, in either direction. */
 export function removeConnection(yamlText: string, a: string, b: string): string {
   const doc = parse(yamlText);

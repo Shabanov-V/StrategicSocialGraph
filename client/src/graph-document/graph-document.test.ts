@@ -12,6 +12,7 @@ import {
   editPerson,
   addConnection,
   removeConnection,
+  editConnection,
   nextPersonId,
   read,
   GraphDocumentError,
@@ -217,5 +218,19 @@ describe('read', () => {
 
   it('returns an empty object for empty input', () => {
     expect(read('')).toEqual({});
+  });
+});
+
+describe('editConnection', () => {
+  it('merges a patch into the matching edge, in either direction', () => {
+    const out = editConnection(NETWORK, 'Dad', 'Mom', { strength: 'weak' });
+    expect(listConnections(out)).toEqual([
+      { from: 'Mom', to: 'Dad', strength: 'weak' },
+    ]);
+  });
+
+  it('is a no-op when no edge matches', () => {
+    const out = editConnection(NETWORK, 'Mom', 'Nobody', { strength: 'weak' });
+    expect(out).toBe(NETWORK);
   });
 });
