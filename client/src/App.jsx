@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import yaml from 'js-yaml';
 import D3Graph from './components/view/D3Graph.jsx';
 import Layout from './components/layouts/Layout.jsx';
 import InteractivePanel from './components/panels/InteractivePanel.jsx';
@@ -15,6 +14,7 @@ import { useCloudSync } from './hooks/useCloudSync.jsx';
 import styles from './App.module.css';
 import './App.css';
 import { calculateSectorAngles } from './utils/layout-helper.js';
+import { read } from './graph-document';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 const STORAGE_KEY = 'graphYaml';
@@ -106,7 +106,7 @@ function App() {
   useEffect(() => {
     if (!yamlText) return;
     try {
-      const data = yaml.load(yamlText);
+      const data = read(yamlText);
       setGraphData(calculateSectorAngles(data));
       setYamlError(null);
     } catch (e) {
