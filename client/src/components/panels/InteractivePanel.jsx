@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Select from 'react-select';
 import styles from '../common/styles.module.css';
 import PersonForm from '../ui/PersonForm';
+import { blankAddForm, stickyReset, hasNonDefaultAdvanced } from './person-form';
 import {
   listPeople,
   listSectors,
@@ -14,42 +15,42 @@ import {
   GraphDocumentError,
 } from '../../graph-document';
 
-const blankForm = (id = '') => ({
-  name: '',
-  id: String(id),
-  sector: '',
-  customSector: '',
-  circle: '2', // default circle is 2
-  importance: 'normal',
-  strength: 'normal',
-  direction: 'mutual',
-  quality: 'positive',
-  color_group: 'friend',
-});
+// Keep a form's color_group valid against the currently available groups.
+function reconcileColor(form, availableGroups) {
+  if (availableGroups.length === 0) return { ...form, color_group: '' };
+  if (!availableGroups.includes(form.color_group)) {
+    return { ...form, color_group: availableGroups[0] };
+  }
+  return form;
+}
 
 function InteractivePanel({ yamlText, setYamlText }) {
   const [activeTab, setActiveTab] = useState('add');
   const [people, setPeople] = useState([]);
   const [selectedPerson, setSelectedPerson] = useState('');
-  const [formData, setFormData] = useState(blankForm());
+
+  // Add and Edit keep separate form state so sticky add-values never bleed
+  // into Edit (and a person's values never bleed back into the sticky add form).
+  const [addForm, setAddForm] = useState(blankAddForm());
+  const [editForm, setEditForm] = useState(blankAddForm());
+
+  const [addAdvancedOpen, setAddAdvancedOpen] = useState(false);
+  const [editAdvancedOpen, setEditAdvancedOpen] = useState(false);
+
+  const [confirmMessage, setConfirmMessage] = useState('');
+  const confirmTimer = useRef(null);
+  const nameRef = useRef(null);
 
   const [sectors, setSectors] = useState([]);
   const [colorGroups, setColorGroups] = useState({});
-  const [nextId, setNextId] = useState('1');
 
-  const handleChange = (e) => {
+  const makeHandleChange = (setForm) => (e) => {
     const { name, value } = e.target;
-    // Only allow circle to be 1, 2, or 3
-    if (name === 'circle') {
-      if (!['1', '2', '3', 1, 2, 3].includes(value)) return;
-    }
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    if (name === 'circle' && !['1', '2', '3', 1, 2, 3].includes(value)) return;
+    setForm(prev => ({ ...prev, [name]: value }));
   };
 
-  // Recompute people, sectors, color groups, and next id whenever yamlText changes
+  // Recompute people, sectors, color groups, and next id whenever yamlText changes.
   useEffect(() => {
     try {
       setPeople(listPeople(yamlText));
@@ -57,51 +58,41 @@ function InteractivePanel({ yamlText, setYamlText }) {
 
       const newColorGroups = getIn(yamlText, ['display', 'colors']) || {};
       setColorGroups(newColorGroups);
-
-      setFormData(prev => {
-        const availableColorGroups = Object.keys(newColorGroups);
-        const currentGroup = prev.color_group;
-
-        // If no groups are available, the selection must be empty.
-        if (availableColorGroups.length === 0) {
-          return { ...prev, color_group: '' };
-        }
-
-        // If groups are available, check if the current selection is valid.
-        if (!availableColorGroups.includes(currentGroup)) {
-          // If not valid, set it to the first available group.
-          return { ...prev, color_group: availableColorGroups[0] };
-        }
-
-        // Otherwise, the selection is valid, so no change is needed.
-        return prev;
-      });
+      const available = Object.keys(newColorGroups);
 
       const candidateId = nextPersonId(yamlText);
-      setNextId(String(candidateId));
-      setFormData(prev => ({ ...prev, id: String(candidateId) }));
+      setAddForm(prev => reconcileColor({ ...prev, id: String(candidateId) }, available));
+      setEditForm(prev => reconcileColor(prev, available));
     } catch {
-      // If YAML can't be parsed, keep sectors empty
       setSectors([]);
-      setNextId('1');
-      setFormData(prev => ({ ...prev, id: '1' }));
+      setAddForm(prev => ({ ...prev, id: '1' }));
     }
   }, [yamlText]);
 
+  // Fill the edit form from the selected person; open Advanced when that
+  // person carries non-default advanced values so editing never hides data.
   useEffect(() => {
     if (selectedPerson) {
       const person = people.find(p => p.id === parseInt(selectedPerson));
       if (person) {
-        setFormData({
-          ...person,
-          id: person.id,
-          circle: String(person.circle),
-        });
+        setEditForm({ ...person, id: person.id, circle: String(person.circle) });
+        setEditAdvancedOpen(hasNonDefaultAdvanced(person));
       }
-    } else {
-      setFormData(blankForm(nextId));
     }
-  }, [selectedPerson, people, nextId]);
+  }, [selectedPerson, people]);
+
+  // Focus the name field when the Add tab is shown.
+  useEffect(() => {
+    if (activeTab === 'add') nameRef.current?.focus();
+  }, [activeTab]);
+
+  useEffect(() => () => clearTimeout(confirmTimer.current), []);
+
+  const flashConfirm = (text) => {
+    setConfirmMessage(text);
+    clearTimeout(confirmTimer.current);
+    confirmTimer.current = setTimeout(() => setConfirmMessage(''), 2500);
+  };
 
   const handleDelete = () => {
     if (!selectedPerson) return;
@@ -126,7 +117,6 @@ function InteractivePanel({ yamlText, setYamlText }) {
     }
 
     try {
-      // Clear people, then their connections
       const cleared = setIn(setIn(yamlText, ['people'], []), ['peer_connections'], []);
       setYamlText(cleared);
       setSelectedPerson('');
@@ -135,18 +125,19 @@ function InteractivePanel({ yamlText, setYamlText }) {
     }
   };
 
+  const toDraft = (form) => {
+    const sectorValue = form.sector === '__other' ? form.customSector : form.sector;
+    const draft = { ...form, sector: sectorValue, circle: parseInt(form.circle, 10) };
+    delete draft.customSector;
+    return draft;
+  };
+
   const handleEditSubmit = (e) => {
     e.preventDefault();
     try {
-      const sectorValue = formData.sector === '__other' ? formData.customSector : formData.sector;
-      const patch = {
-        ...formData,
-        sector: sectorValue,
-        circle: parseInt(formData.circle, 10),
-      };
-      delete patch.customSector;
+      const patch = toDraft(editForm);
       delete patch.id; // editPerson takes the id separately
-      setYamlText(editPerson(yamlText, parseInt(formData.id, 10), patch));
+      setYamlText(editPerson(yamlText, parseInt(editForm.id, 10), patch));
     } catch (error) {
       if (error instanceof GraphDocumentError) {
         alert(error.message);
@@ -159,20 +150,16 @@ function InteractivePanel({ yamlText, setYamlText }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     try {
-      // Determine sector value: use customSector when user selected Other
-      const sectorValue = formData.sector === '__other' ? formData.customSector : formData.sector;
-      const draft = {
-        ...formData,
-        sector: sectorValue,
-        circle: parseInt(formData.circle, 10),
-      };
-      delete draft.customSector;
+      const draft = toDraft(addForm);
+      const name = draft.name;
       delete draft.id; // the module assigns the next free id
 
-      // The derive effect refreshes nextId after the document changes.
       const updatedYaml = addPerson(yamlText, draft);
       setYamlText(updatedYaml);
-      setFormData(blankForm(nextPersonId(updatedYaml)));
+      // Sticky: clear name only, keep sector/circle/importance/color for the next add.
+      setAddForm(prev => stickyReset(prev, nextPersonId(updatedYaml)));
+      flashConfirm(`✓ Added ${name}`);
+      nameRef.current?.focus();
     } catch (error) {
       if (error instanceof GraphDocumentError) {
         alert(error.message);
@@ -203,12 +190,16 @@ function InteractivePanel({ yamlText, setYamlText }) {
 
       {activeTab === 'add' && (
         <PersonForm
-          formData={formData}
+          formData={addForm}
           sectors={sectors}
           colorGroups={colorGroups}
-          handleChange={handleChange}
+          handleChange={makeHandleChange(setAddForm)}
           handleSubmit={handleSubmit}
-          buttonText="Add Node"
+          buttonText="Add Person"
+          advancedOpen={addAdvancedOpen}
+          onToggleAdvanced={() => setAddAdvancedOpen(o => !o)}
+          nameRef={nameRef}
+          confirmMessage={confirmMessage}
         />
       )}
 
@@ -229,13 +220,15 @@ function InteractivePanel({ yamlText, setYamlText }) {
 
           {selectedPerson && (
             <PersonForm
-              formData={formData}
+              formData={editForm}
               sectors={sectors}
               colorGroups={colorGroups}
-              handleChange={handleChange}
+              handleChange={makeHandleChange(setEditForm)}
               handleSubmit={handleEditSubmit}
               buttonText="Save Changes"
               onDelete={handleDelete}
+              advancedOpen={editAdvancedOpen}
+              onToggleAdvanced={() => setEditAdvancedOpen(o => !o)}
             />
           )}
 
