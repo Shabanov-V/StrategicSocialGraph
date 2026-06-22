@@ -55,6 +55,14 @@ export default function Sidebar({ isOpen, selectedPanel, setSelectedPanel, authS
           <img src={settingsIcon} alt="Toggle config editor" />
         </span>
       </button>
+      <button
+        className={styles.toggleButton}
+        onClick={() => togglePanel('checkin')}
+        aria-label="Toggle daily check-in"
+        title="Daily check-in"
+      >
+        <span className={styles.icon} style={{ fontSize: '20px', lineHeight: 1 }}>✓</span>
+      </button>
       <div className={styles.spacer} />
       {authSlot}
     </div>

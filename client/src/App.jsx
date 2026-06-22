@@ -5,6 +5,7 @@ import InteractivePanel from './components/panels/InteractivePanel.jsx';
 import ConnectionEditor from './components/panels/ConnectionEditor.jsx';
 import CodePanel from './components/panels/CodePanel.jsx';
 import ConfigEditor from './components/panels/ConfigEditor.jsx';
+import DailyCheckin from './components/panels/DailyCheckin.jsx';
 import GoogleLoginButton from './components/auth/GoogleLoginButton.jsx';
 import UserMenu from './components/auth/UserMenu.jsx';
 import SyncStatus from './components/auth/SyncStatus.jsx';
@@ -146,6 +147,8 @@ function App() {
       return <ConnectionEditor yamlText={yamlText} setYamlText={setYamlText} />;
     } else if (selectedPanel === 'config') {
       return <ConfigEditor yamlText={yamlText} setYamlText={setYamlText} />;
+    } else if (selectedPanel === 'checkin') {
+      return <DailyCheckin yamlText={yamlText} setYamlText={setYamlText} />;
     }
     return null;
   };

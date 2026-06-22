@@ -19,6 +19,8 @@ import {
   listNotes,
   addNote,
   removeNote,
+  getContactDates,
+  setContactsForDate,
   read,
   GraphDocumentError,
 } from './index';
@@ -297,6 +299,46 @@ peer_connections:
     expect(getIn(out, ['people', 0, 'color_group'])).toBe('family');
     expect(getIn(out, ['people', 1, 'color_group'])).toBe('buddy');
     expect(getIn(out, ['peer_connections', 0, 'color_group'])).toBe('buddy');
+  });
+});
+
+describe('contact log', () => {
+  const PEOPLE = `people:
+  - id: 1
+    name: Mom
+    circle: 1
+  - id: 2
+    name: Dad
+    circle: 1
+`;
+
+  it('getContactDates returns [] for a person with no contacts', () => {
+    expect(getContactDates(PEOPLE, 1)).toEqual([]);
+  });
+
+  it('getContactDates returns [] for an unknown id', () => {
+    expect(getContactDates(PEOPLE, 99)).toEqual([]);
+  });
+
+  it('setContactsForDate adds the date to listed people, sorted and deduped', () => {
+    let out = setContactsForDate(PEOPLE, '2026-06-22', [1]);
+    out = setContactsForDate(out, '2026-06-20', [1]);
+    expect(getContactDates(out, 1)).toEqual(['2026-06-20', '2026-06-22']);
+    expect(getContactDates(out, 2)).toEqual([]);
+  });
+
+  it('setContactsForDate is idempotent for the same date and set', () => {
+    let out = setContactsForDate(PEOPLE, '2026-06-22', [1]);
+    out = setContactsForDate(out, '2026-06-22', [1]);
+    expect(getContactDates(out, 1)).toEqual(['2026-06-22']);
+  });
+
+  it('setContactsForDate removes the date from people dropped from the set, keeping their other dates', () => {
+    let out = setContactsForDate(PEOPLE, '2026-06-20', [1]);
+    out = setContactsForDate(out, '2026-06-22', [1]); // Mom: 20, 22
+    out = setContactsForDate(out, '2026-06-22', [2]); // date 22 now only Dad
+    expect(getContactDates(out, 1)).toEqual(['2026-06-20']); // 22 removed, 20 kept
+    expect(getContactDates(out, 2)).toEqual(['2026-06-22']);
   });
 });
 

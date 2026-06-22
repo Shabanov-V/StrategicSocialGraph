@@ -167,6 +167,42 @@ export function removeNote(yamlText: string, id: number, noteIndex: number): str
   return serialize(doc);
 }
 
+/** A person's contact dates (ISO YYYY-MM-DD), sorted ascending; empty list if none or unknown id. */
+export function getContactDates(yamlText: string, id: number): string[] {
+  const person = listPeople(yamlText).find((p) => p.id === id);
+  const dates = (person?.contacts ?? []) as string[];
+  return [...dates].sort();
+}
+
+/**
+ * Make "the set of people contacted on `date`" exactly equal `ids`: add `date` to
+ * each listed person (deduped, kept sorted) and remove `date` from anyone who had it
+ * but isn't listed. All other dates on all people are left untouched.
+ */
+export function setContactsForDate(
+  yamlText: string,
+  date: string,
+  ids: number[],
+): string {
+  const wanted = new Set(ids);
+  const doc = parse(yamlText);
+  const people = listPeople(yamlText);
+
+  people.forEach((person, index) => {
+    const current = (person.contacts ?? []) as string[];
+    const hasDate = current.includes(date);
+    const shouldHave = wanted.has(person.id);
+    if (hasDate === shouldHave) return;
+
+    const next = shouldHave
+      ? [...current, date].sort()
+      : current.filter((d) => d !== date);
+    doc.setIn(['people', index, 'contacts'], doc.createNode(next));
+  });
+
+  return serialize(doc);
+}
+
 /**
  * Sectors a form should offer: the union of sectors used by people and the keys
  * of layout.sector_distribution, deduped and case-insensitively sorted.
