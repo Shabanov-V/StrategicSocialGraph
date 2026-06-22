@@ -1,3 +1,4 @@
+import { isMap, isScalar } from 'yaml';
 import { parse, serialize } from './cst';
 import { GraphDocumentError, type Connection, type Person, type PersonDraft } from './types';
 
@@ -179,6 +180,56 @@ export function setIn(yamlText: string, path: Path, value: unknown): string {
 export function deleteIn(yamlText: string, path: Path): string {
   const doc = parse(yamlText);
   doc.deleteIn(path);
+  return serialize(doc);
+}
+
+/**
+ * Rename a map key in place at `path`, keeping its position, value, and comments.
+ * Unlike deleteIn + setIn (which appends the new key at the map's end), this leaves
+ * the entry where it was — so a form rendering the map keeps stable row order and focus.
+ * No-op (returns input unchanged) if oldKey is unchanged, newKey is empty, or oldKey is absent.
+ */
+export function renameKey(
+  yamlText: string,
+  path: Path,
+  oldKey: string | number,
+  newKey: string | number,
+): string {
+  if (oldKey === newKey || newKey === '') return yamlText;
+  const doc = parse(yamlText);
+  const node = doc.getIn(path, true);
+  if (!isMap(node)) return yamlText;
+  const pair = node.items.find((p) => {
+    const k = isScalar(p.key) ? p.key.value : p.key;
+    return String(k) === String(oldKey);
+  });
+  if (!pair) return yamlText;
+  pair.key = doc.createNode(newKey);
+  return serialize(doc);
+}
+
+/**
+ * Rename a display.colors group in place and cascade the new name to every person
+ * and connection that referenced it — so already-colored nodes keep their color
+ * instead of orphaning to the fallback. No-op if unchanged or newName is empty.
+ */
+export function renameColorGroup(
+  yamlText: string,
+  oldName: string,
+  newName: string,
+): string {
+  if (oldName === newName || newName === '') return yamlText;
+  const doc = parse(renameKey(yamlText, ['display', 'colors'], oldName, newName));
+  const data = (doc.toJS() ?? {}) as {
+    people?: Person[];
+    peer_connections?: Connection[];
+  };
+  (data.people ?? []).forEach((p, i) => {
+    if (p?.color_group === oldName) doc.setIn(['people', i, 'color_group'], newName);
+  });
+  (data.peer_connections ?? []).forEach((c, i) => {
+    if (c?.color_group === oldName) doc.setIn(['peer_connections', i, 'color_group'], newName);
+  });
   return serialize(doc);
 }
 

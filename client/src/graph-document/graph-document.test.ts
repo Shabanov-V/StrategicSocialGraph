@@ -8,6 +8,8 @@ import {
   getIn,
   setIn,
   deleteIn,
+  renameKey,
+  renameColorGroup,
   removePerson,
   editPerson,
   addConnection,
@@ -205,6 +207,55 @@ describe('config path operations', () => {
   it('deleteIn removes a nested key', () => {
     const out = deleteIn(cfg, ['display', 'colors', 'friend']);
     expect(getIn(out, ['display', 'colors', 'friend'])).toBeUndefined();
+  });
+});
+
+describe('renameKey', () => {
+  const cfg = `display:\n  colors:\n    friend: '#0f0'\n    family: '#00f'\n    work: '#f00'\n`;
+
+  it('renames a map key in place, preserving its position', () => {
+    const out = renameKey(cfg, ['display', 'colors'], 'friend', 'buddy');
+    expect(listColorGroups(out)).toEqual(['buddy', 'family', 'work']);
+    expect(getIn(out, ['display', 'colors', 'buddy'])).toBe('#0f0');
+  });
+
+  it('preserves the value while renaming', () => {
+    const out = renameKey(cfg, ['display', 'colors'], 'family', 'kin');
+    expect(getIn(out, ['display', 'colors', 'kin'])).toBe('#00f');
+    expect(getIn(out, ['display', 'colors', 'family'])).toBeUndefined();
+  });
+
+  it('is a no-op when the key is unchanged, empty, or absent', () => {
+    expect(renameKey(cfg, ['display', 'colors'], 'friend', 'friend')).toBe(cfg);
+    expect(renameKey(cfg, ['display', 'colors'], 'friend', '')).toBe(cfg);
+    expect(renameKey(cfg, ['display', 'colors'], 'nope', 'x')).toBe(cfg);
+  });
+});
+
+describe('renameColorGroup', () => {
+  const yaml = `display:
+  colors:
+    friend: '#0f0'
+    family: '#00f'
+people:
+  - id: 1
+    name: Mom
+    color_group: family
+  - id: 2
+    name: Pat
+    color_group: friend
+peer_connections:
+  - from: Mom
+    to: Pat
+    color_group: friend
+`;
+
+  it('renames the color in place and cascades to people and connections', () => {
+    const out = renameColorGroup(yaml, 'friend', 'buddy');
+    expect(listColorGroups(out)).toEqual(['buddy', 'family']);
+    expect(getIn(out, ['people', 0, 'color_group'])).toBe('family');
+    expect(getIn(out, ['people', 1, 'color_group'])).toBe('buddy');
+    expect(getIn(out, ['peer_connections', 0, 'color_group'])).toBe('buddy');
   });
 });
 

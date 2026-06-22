@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styles from '../common/styles.module.css';
-import { read, getIn, setIn, deleteIn } from '../../graph-document';
+import { read, getIn, setIn, deleteIn, renameKey, renameColorGroup } from '../../graph-document';
 
 // Read the subtree at `path` from the rendered plain-object view.
 const at = (data, path) => {
@@ -12,22 +12,25 @@ const at = (data, path) => {
   return current;
 };
 
-const DynamicMap = ({ label, path, data, yamlText, setYamlText, styles, keyType = 'string', valType = 'string' }) => {
+const DynamicMap = ({ label, path, data, yamlText, setYamlText, styles, keyType = 'string', valType = 'string', renameKeyOp = renameKey }) => {
   const current = at(data, path);
   const mapObj = current && typeof current === 'object' && !Array.isArray(current) ? current : {};
   const entries = Object.entries(mapObj);
 
   const updateMap = (oldKey, newKey, value) => {
-    let next = yamlText;
     if (value === null) {
-      next = deleteIn(next, [...path, newKey]);
-    } else {
-      const finalKey = keyType === 'number' && !isNaN(newKey) && String(newKey).trim() !== '' ? Number(newKey) : newKey;
-      const finalValue = valType === 'number' && !isNaN(value) && String(value).trim() !== '' ? Number(value) : value;
-      if (oldKey !== '' && oldKey !== finalKey) next = deleteIn(next, [...path, oldKey]);
-      next = setIn(next, [...path, finalKey], finalValue);
+      setYamlText(deleteIn(yamlText, [...path, newKey]));
+      return;
     }
-    setYamlText(next);
+    const finalKey = keyType === 'number' && !isNaN(newKey) && String(newKey).trim() !== '' ? Number(newKey) : newKey;
+    const finalValue = valType === 'number' && !isNaN(value) && String(value).trim() !== '' ? Number(value) : value;
+    // Pure rename: keep the entry in place (and cascade) so the row doesn't jump
+    // to the map's end on every keystroke, which would steal focus.
+    if (oldKey !== '' && oldKey !== finalKey) {
+      setYamlText(renameKeyOp(yamlText, path, oldKey, finalKey));
+      return;
+    }
+    setYamlText(setIn(yamlText, [...path, finalKey], finalValue));
   };
 
   const addEntry = () => {
@@ -107,14 +110,16 @@ const DynamicStyleMap = ({ label, path, fields, data, yamlText, setYamlText, sty
   const entries = Object.entries(mapObj);
 
   const updateEntry = (oldKey, newKey, newObj) => {
-    let next = yamlText;
     if (newObj === null) {
-      next = deleteIn(next, [...path, newKey]);
-    } else {
-      if (oldKey !== '' && oldKey !== newKey) next = deleteIn(next, [...path, oldKey]);
-      next = setIn(next, [...path, newKey], newObj);
+      setYamlText(deleteIn(yamlText, [...path, newKey]));
+      return;
     }
-    setYamlText(next);
+    // Pure rename: keep the entry in place so the row doesn't jump and steal focus.
+    if (oldKey !== '' && oldKey !== newKey) {
+      setYamlText(renameKey(yamlText, path, oldKey, newKey));
+      return;
+    }
+    setYamlText(setIn(yamlText, [...path, newKey], newObj));
   };
 
   const addStyle = () => {
@@ -233,7 +238,7 @@ function ConfigEditor({ yamlText, setYamlText }) {
                  Show Circles
                </label>
             </div>
-            <DynamicMap label="Colors (Name: Hex/Color)" path={['display', 'colors']} data={data} yamlText={yamlText} setYamlText={setYamlText} styles={styles} />
+            <DynamicMap label="Colors (Name: Hex/Color)" path={['display', 'colors']} data={data} yamlText={yamlText} setYamlText={setYamlText} styles={styles} renameKeyOp={(yt, _path, oldKey, newKey) => renameColorGroup(yt, oldKey, newKey)} />
             <DynamicStyleMap label="Line Styles" path={['display', 'line_styles']} fields={[{name: 'width', type: 'number'}, {name: 'style', type: 'text'}]} data={data} yamlText={yamlText} setYamlText={setYamlText} styles={styles} />
             <DynamicStyleMap label="Point Styles" path={['display', 'point_styles']} fields={[{name: 'size', type: 'number'}, {name: 'style', type: 'text'}]} data={data} yamlText={yamlText} setYamlText={setYamlText} styles={styles} />
           </div>
