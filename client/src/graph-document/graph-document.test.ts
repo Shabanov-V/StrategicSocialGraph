@@ -16,6 +16,9 @@ import {
   removeConnection,
   editConnection,
   nextPersonId,
+  listNotes,
+  addNote,
+  removeNote,
   read,
   GraphDocumentError,
 } from './index';
@@ -113,6 +116,44 @@ describe('editPerson', () => {
     expect(listConnections(out)).toEqual([
       { from: 'Mama', to: 'Dad', strength: 'strong' },
     ]);
+  });
+});
+
+describe('notes', () => {
+  it('listNotes returns an empty list when a person has none', () => {
+    expect(listNotes(NETWORK, 1)).toEqual([]);
+  });
+
+  it('addNote appends an entry, creating the list if absent', () => {
+    const out = addNote(NETWORK, 1, { date: '2026-06-22', text: 'met at conf' });
+    expect(listNotes(out, 1)).toEqual([{ date: '2026-06-22', text: 'met at conf' }]);
+  });
+
+  it('addNote appends in order, newest last', () => {
+    let out = addNote(NETWORK, 1, { date: '2026-06-01', text: 'first' });
+    out = addNote(out, 1, { date: '2026-06-22', text: 'second' });
+    expect(listNotes(out, 1)).toEqual([
+      { date: '2026-06-01', text: 'first' },
+      { date: '2026-06-22', text: 'second' },
+    ]);
+  });
+
+  it('addNote is a no-op for an unknown id', () => {
+    const out = addNote(NETWORK, 999, { date: '2026-06-22', text: 'x' });
+    expect(out).toBe(NETWORK);
+  });
+
+  it('removeNote drops the entry at the given index', () => {
+    let out = addNote(NETWORK, 1, { date: '2026-06-01', text: 'first' });
+    out = addNote(out, 1, { date: '2026-06-22', text: 'second' });
+    out = removeNote(out, 1, 0);
+    expect(listNotes(out, 1)).toEqual([{ date: '2026-06-22', text: 'second' }]);
+  });
+
+  it('preserves comments when adding a note', () => {
+    const withComment = `# graph\n${NETWORK}`;
+    const out = addNote(withComment, 1, { date: '2026-06-22', text: 'hi' });
+    expect(out).toContain('# graph');
   });
 });
 
