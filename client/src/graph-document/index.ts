@@ -1,8 +1,14 @@
 import { parse, serialize } from './cst';
-import { GraphDocumentError, type Connection, type Person, type PersonDraft } from './types';
+import {
+  GraphDocumentError,
+  type Connection,
+  type NoteEntry,
+  type Person,
+  type PersonDraft,
+} from './types';
 
 export { GraphDocumentError } from './types';
-export type { Person, PersonDraft, Connection, Circle } from './types';
+export type { Person, PersonDraft, Connection, Circle, NoteEntry } from './types';
 
 /** Throw GraphDocumentError if any supplied person field violates an invariant. */
 function validatePersonFields(fields: Partial<Person>): void {
@@ -128,6 +134,35 @@ export function removePerson(yamlText: string, id: number): string {
       doc.deleteIn(['peer_connections', i]);
     }
   }
+  return serialize(doc);
+}
+
+/** A person's free-text log entries, in document order; empty list if none. */
+export function listNotes(yamlText: string, id: number): NoteEntry[] {
+  const person = listPeople(yamlText).find((p) => p.id === id);
+  return (person?.notes ?? []) as NoteEntry[];
+}
+
+/** Append a dated log entry to a person, creating the list if absent. No-op for an unknown id. */
+export function addNote(yamlText: string, id: number, entry: NoteEntry): string {
+  const index = listPeople(yamlText).findIndex((p) => p.id === id);
+  if (index === -1) return yamlText;
+
+  const doc = parse(yamlText);
+  if (doc.getIn(['people', index, 'notes']) == null) {
+    doc.setIn(['people', index, 'notes'], doc.createNode([]));
+  }
+  doc.addIn(['people', index, 'notes'], { ...entry });
+  return serialize(doc);
+}
+
+/** Remove the log entry at the given index from a person. No-op for an unknown id. */
+export function removeNote(yamlText: string, id: number, noteIndex: number): string {
+  const index = listPeople(yamlText).findIndex((p) => p.id === id);
+  if (index === -1) return yamlText;
+
+  const doc = parse(yamlText);
+  doc.deleteIn(['people', index, 'notes', noteIndex]);
   return serialize(doc);
 }
 

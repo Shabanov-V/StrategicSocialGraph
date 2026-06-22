@@ -14,7 +14,7 @@ import { useCloudSync } from './hooks/useCloudSync.jsx';
 import styles from './App.module.css';
 import './App.css';
 import { calculateSectorAngles } from './utils/layout-helper.js';
-import { read } from './graph-document';
+import { read, listPeople, addNote, removeNote } from './graph-document';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 const STORAGE_KEY = 'graphYaml';
@@ -120,6 +120,23 @@ function App() {
     try { localStorage.setItem(STORAGE_KEY, yamlText); } catch (_e) { /* ignore */ }
   }, [yamlText]);
 
+  const handleAddNote = useCallback((node, text) => {
+    const date = new Date().toISOString().slice(0, 10);
+    setYamlText(prev => {
+      const person = listPeople(prev).find(p => p.name === node.name);
+      if (!person) return prev;
+      return addNote(prev, person.id, { date, text });
+    });
+  }, []);
+
+  const handleRemoveNote = useCallback((node, index) => {
+    setYamlText(prev => {
+      const person = listPeople(prev).find(p => p.name === node.name);
+      if (!person) return prev;
+      return removeNote(prev, person.id, index);
+    });
+  }, []);
+
   const choosePanel = () => {
     if (selectedPanel === 'code') {
       return <CodePanel value={yamlText} onChange={setYamlText} error={yamlError} />;
@@ -139,7 +156,7 @@ function App() {
         setSelectedPanel={setSelectedPanel}
         selectedPanel={selectedPanel}
         left={choosePanel()}
-        right={<D3Graph graphData={graphData} />}
+        right={<D3Graph graphData={graphData} onAddNote={handleAddNote} onRemoveNote={handleRemoveNote} />}
         authSlot={
           authLoading ? null : user ? (
             <>

@@ -3,10 +3,27 @@ import * as d3 from 'd3';
 import { processGraphDataForD3, createSimulation, getD3Style, constrainToSector } from '../../utils/d3-helper';
 import styles from './D3Graph.module.css';
 
-const D3Graph = ({ graphData }) => {
+const D3Graph = ({ graphData, onAddNote, onRemoveNote }) => {
     const svgRef = useRef(null);
     const containerRef = useRef(null);
-    const [selectedNodeInfo, setSelectedNodeInfo] = useState('Кликните на узел для получения информации');
+    const [selectedNode, setSelectedNode] = useState(null);
+    const [noteInput, setNoteInput] = useState('');
+
+    useEffect(() => {
+        setNoteInput('');
+    }, [selectedNode]);
+
+    // Notes are derived live from the document so the list refreshes after each add.
+    const currentNotes = selectedNode
+        ? (graphData?.people?.find(p => p.name === selectedNode.name)?.notes ?? [])
+        : [];
+
+    const handleAddNote = () => {
+        const text = noteInput.trim();
+        if (!text || !selectedNode || typeof onAddNote !== 'function') return;
+        onAddNote(selectedNode, text);
+        setNoteInput('');
+    };
 
     useEffect(() => {
         if (!graphData || !svgRef.current || !containerRef.current) return;
@@ -127,15 +144,7 @@ const D3Graph = ({ graphData }) => {
             .attr("fill", d => style.node(d).fill)
             .call(drag(simulation, centerX, centerY))
             .on("click", (event, d) => {
-                let info = `<strong>${d.name}</strong><br>`;
-                if (d.type === 'center') {
-                    info += `Центральная персона`;
-                } else {
-                    info += `Сектор: ${d.sector}<br>`;
-                    info += `Круг: ${d.circle}<br>`;
-                    info += `Важность: ${d.importance}`;
-                }
-                setSelectedNodeInfo(info);
+                setSelectedNode(d);
             });
 
         const label = g.append("g")
@@ -209,11 +218,58 @@ const D3Graph = ({ graphData }) => {
     return (
         <div ref={containerRef} className={styles.container}>
             <svg ref={svgRef}></svg>
-            <div
-                className={styles.infoPanel}
-                dangerouslySetInnerHTML={{ __html: selectedNodeInfo }}
-            >
-            </div>
+            {selectedNode && (
+                <div className={styles.infoPanel}>
+                    <button
+                        className={styles.closeBtn}
+                        onClick={() => setSelectedNode(null)}
+                        aria-label="Закрыть"
+                    >
+                        ×
+                    </button>
+                    <div className={styles.nodeName}>{selectedNode.name}</div>
+                    <div className={styles.nodeMeta}>
+                        {selectedNode.type === 'center' ? (
+                            'Центральная персона'
+                        ) : (
+                            <>
+                                Сектор: {selectedNode.sector}<br />
+                                Круг: {selectedNode.circle}<br />
+                                Важность: {selectedNode.importance}
+                            </>
+                        )}
+                    </div>
+                    <div className={styles.addRow}>
+                        <input
+                            className={styles.noteInput}
+                            value={noteInput}
+                            onChange={(e) => setNoteInput(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === 'Enter') handleAddNote(); }}
+                            placeholder="Добавить заметку..."
+                        />
+                        <button className={styles.addBtn} onClick={handleAddNote}>
+                            +
+                        </button>
+                    </div>
+                    {currentNotes.length > 0 && (
+                        <ul className={styles.noteList}>
+                            {currentNotes.map((n, i) => i).reverse().map((i) => (
+                                <li key={i} className={styles.noteItem}>
+                                    <span className={styles.noteDate}>{currentNotes[i].date}</span>
+                                    <span className={styles.noteText}>{currentNotes[i].text}</span>
+                                    <button
+                                        className={styles.noteDel}
+                                        onClick={() => onRemoveNote?.(selectedNode, i)}
+                                        aria-label="Удалить заметку"
+                                    >
+                                        ×
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </div>
+            )}
         </div>
     );
 };

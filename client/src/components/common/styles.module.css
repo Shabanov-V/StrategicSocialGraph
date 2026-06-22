@@ -90,3 +90,24 @@
 .deleteAllButton:hover {
   background-color: #c82333;
 }
+
+.advancedToggle {
+  background: none;
+  border: none;
+  color: var(--primary-blue);
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  text-align: left;
+}
+
+.advancedToggle:hover {
+  text-decoration: underline;
+}
+
+.confirmMessage {
+  color: #2e7d32; /* green */
+  font-size: 0.9rem;
+  margin: 4px 0 8px 0;
+}

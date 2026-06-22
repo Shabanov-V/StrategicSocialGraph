@@ -1,7 +1,19 @@
 import React from 'react';
 import styles from '../common/styles.module.css';
 
-function PersonForm({ formData, sectors, colorGroups, handleChange, handleSubmit, buttonText, onDelete }) {
+function PersonForm({
+  formData,
+  sectors,
+  colorGroups,
+  handleChange,
+  handleSubmit,
+  buttonText,
+  onDelete,
+  advancedOpen,
+  onToggleAdvanced,
+  nameRef,
+  confirmMessage,
+}) {
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
       <div className={styles.formGroup}>
@@ -10,6 +22,7 @@ function PersonForm({ formData, sectors, colorGroups, handleChange, handleSubmit
           type="text"
           id="name"
           name="name"
+          ref={nameRef}
           value={formData.name}
           onChange={handleChange}
           required
@@ -77,48 +90,6 @@ function PersonForm({ formData, sectors, colorGroups, handleChange, handleSubmit
         </select>
       </div>
 
-      <div className={styles.formGroup}>
-        <label htmlFor="strength">Strength:</label>
-        <select
-          id="strength"
-          name="strength"
-          value={formData.strength}
-          onChange={handleChange}
-        >
-          <option value="normal">Normal</option>
-          <option value="strong">Strong</option>
-          <option value="weak">Weak</option>
-        </select>
-      </div>
-
-      <div className={styles.formGroup}>
-        <label htmlFor="direction">Direction:</label>
-        <select
-          id="direction"
-          name="direction"
-          value={formData.direction}
-          onChange={handleChange}
-        >
-          <option value="mutual">Mutual</option>
-          <option value="incoming">Incoming</option>
-          <option value="outgoing">Outgoing</option>
-        </select>
-      </div>
-
-      <div className={styles.formGroup}>
-        <label htmlFor="quality">Quality:</label>
-        <select
-          id="quality"
-          name="quality"
-          value={formData.quality}
-          onChange={handleChange}
-        >
-          <option value="positive">Positive</option>
-          <option value="negative">Negative</option>
-          <option value="neutral">Neutral</option>
-        </select>
-      </div>
-
       {colorGroups && Object.keys(colorGroups).length > 0 && (
         <div className={styles.formGroup}>
           <label htmlFor="color_group">Color Group:</label>
@@ -134,6 +105,63 @@ function PersonForm({ formData, sectors, colorGroups, handleChange, handleSubmit
           </select>
         </div>
       )}
+
+      <button
+        type="button"
+        className={styles.advancedToggle}
+        onClick={onToggleAdvanced}
+        aria-expanded={advancedOpen}
+      >
+        {advancedOpen ? '▾ Advanced' : '▸ Advanced'}
+      </button>
+
+      {advancedOpen && (
+        <>
+          <div className={styles.formGroup}>
+            <label htmlFor="strength">Strength:</label>
+            <select
+              id="strength"
+              name="strength"
+              value={formData.strength}
+              onChange={handleChange}
+            >
+              <option value="normal">Normal</option>
+              <option value="strong">Strong</option>
+              <option value="weak">Weak</option>
+            </select>
+          </div>
+
+          <div className={styles.formGroup}>
+            <label htmlFor="direction">Direction:</label>
+            <select
+              id="direction"
+              name="direction"
+              value={formData.direction}
+              onChange={handleChange}
+            >
+              <option value="mutual">Mutual</option>
+              <option value="incoming">Incoming</option>
+              <option value="outgoing">Outgoing</option>
+            </select>
+          </div>
+
+          <div className={styles.formGroup}>
+            <label htmlFor="quality">Quality:</label>
+            <select
+              id="quality"
+              name="quality"
+              value={formData.quality}
+              onChange={handleChange}
+            >
+              <option value="positive">Positive</option>
+              <option value="negative">Negative</option>
+              <option value="neutral">Neutral</option>
+            </select>
+          </div>
+        </>
+      )}
+
+      {confirmMessage && <p className={styles.confirmMessage}>{confirmMessage}</p>}
 
       <button type="submit" className={styles.submitButton}>
         {buttonText}
