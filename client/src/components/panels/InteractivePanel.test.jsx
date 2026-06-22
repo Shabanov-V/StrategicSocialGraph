@@ -71,6 +71,29 @@ describe('Add person flow', () => {
     // Focus returns to Name for the next entry.
     expect(screen.getByLabelText('Name:')).toHaveFocus();
   });
+
+  it('writes the recall phrase when one is entered', async () => {
+    const user = userEvent.setup();
+    render(<Harness />);
+
+    await user.type(screen.getByLabelText('Name:'), 'Sarah');
+    await user.selectOptions(screen.getByLabelText('Sector:'), 'Work');
+    await user.type(screen.getByLabelText('Who is this?'), "Tom's sister");
+    await user.click(screen.getByRole('button', { name: 'Add Person' }));
+
+    expect(screen.getByTestId('yaml').textContent).toContain("Tom's sister");
+  });
+
+  it('omits the recall key when the field is left blank', async () => {
+    const user = userEvent.setup();
+    render(<Harness />);
+
+    await user.type(screen.getByLabelText('Name:'), 'Bob');
+    await user.selectOptions(screen.getByLabelText('Sector:'), 'Work');
+    await user.click(screen.getByRole('button', { name: 'Add Person' }));
+
+    expect(screen.getByTestId('yaml').textContent).not.toContain('recall');
+  });
 });
 
 const WITH_PERSON = `center: Alex
@@ -91,6 +114,21 @@ function PersonHarness() {
 }
 
 describe('Edit person flow', () => {
+  it('jumps to the Edit tab preselected on the person named by editTargetId', async () => {
+    render(
+      <InteractivePanel
+        yamlText={WITH_PERSON}
+        setYamlText={() => {}}
+        editTargetId={1}
+        onEditTargetConsumed={() => {}}
+      />
+    );
+
+    // Edit form for Mom is shown without any manual tab/person selection.
+    expect(await screen.findByRole('button', { name: 'Save Changes' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Name:')).toHaveValue('Mom');
+  });
+
   it('auto-expands Advanced when the selected person has non-default values', async () => {
     const user = userEvent.setup();
     render(<PersonHarness />);

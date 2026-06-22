@@ -2,8 +2,9 @@ import React, { useRef, useEffect, useState } from 'react';
 import * as d3 from 'd3';
 import { processGraphDataForD3, createSimulation, getD3Style, constrainToSector } from '../../utils/d3-helper';
 import styles from './D3Graph.module.css';
+import NodePanel from './NodePanel';
 
-const D3Graph = ({ graphData, onAddNote, onRemoveNote }) => {
+const D3Graph = ({ graphData, onAddNote, onRemoveNote, onEditPerson }) => {
     const svgRef = useRef(null);
     const containerRef = useRef(null);
     const [selectedNode, setSelectedNode] = useState(null);
@@ -17,6 +18,11 @@ const D3Graph = ({ graphData, onAddNote, onRemoveNote }) => {
     const currentNotes = selectedNode
         ? (graphData?.people?.find(p => p.name === selectedNode.name)?.notes ?? [])
         : [];
+
+    // Recall is derived live too, so an edit refreshes the panel without reselecting.
+    const currentRecall = selectedNode
+        ? (graphData?.people?.find(p => p.name === selectedNode.name)?.recall ?? undefined)
+        : undefined;
 
     const handleAddNote = () => {
         const text = noteInput.trim();
@@ -219,56 +225,17 @@ const D3Graph = ({ graphData, onAddNote, onRemoveNote }) => {
         <div ref={containerRef} className={styles.container}>
             <svg ref={svgRef}></svg>
             {selectedNode && (
-                <div className={styles.infoPanel}>
-                    <button
-                        className={styles.closeBtn}
-                        onClick={() => setSelectedNode(null)}
-                        aria-label="Закрыть"
-                    >
-                        ×
-                    </button>
-                    <div className={styles.nodeName}>{selectedNode.name}</div>
-                    <div className={styles.nodeMeta}>
-                        {selectedNode.type === 'center' ? (
-                            'Центральная персона'
-                        ) : (
-                            <>
-                                Сектор: {selectedNode.sector}<br />
-                                Круг: {selectedNode.circle}<br />
-                                Важность: {selectedNode.importance}
-                            </>
-                        )}
-                    </div>
-                    <div className={styles.addRow}>
-                        <input
-                            className={styles.noteInput}
-                            value={noteInput}
-                            onChange={(e) => setNoteInput(e.target.value)}
-                            onKeyDown={(e) => { if (e.key === 'Enter') handleAddNote(); }}
-                            placeholder="Добавить заметку..."
-                        />
-                        <button className={styles.addBtn} onClick={handleAddNote}>
-                            +
-                        </button>
-                    </div>
-                    {currentNotes.length > 0 && (
-                        <ul className={styles.noteList}>
-                            {currentNotes.map((n, i) => i).reverse().map((i) => (
-                                <li key={i} className={styles.noteItem}>
-                                    <span className={styles.noteDate}>{currentNotes[i].date}</span>
-                                    <span className={styles.noteText}>{currentNotes[i].text}</span>
-                                    <button
-                                        className={styles.noteDel}
-                                        onClick={() => onRemoveNote?.(selectedNode, i)}
-                                        aria-label="Удалить заметку"
-                                    >
-                                        ×
-                                    </button>
-                                </li>
-                            ))}
-                        </ul>
-                    )}
-                </div>
+                <NodePanel
+                    node={selectedNode}
+                    recall={currentRecall}
+                    notes={currentNotes}
+                    noteInput={noteInput}
+                    onNoteInputChange={setNoteInput}
+                    onAddNote={handleAddNote}
+                    onRemoveNote={onRemoveNote}
+                    onClose={() => setSelectedNode(null)}
+                    onEditPerson={onEditPerson}
+                />
             )}
         </div>
     );

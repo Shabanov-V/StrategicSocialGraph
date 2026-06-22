@@ -22,6 +22,7 @@ export function blankAddForm(id = '') {
     customSector: '',
     circle: '2', // default circle is 2
     importance: 'normal',
+    recall: '',
     ...ADVANCED_DEFAULTS,
     color_group: 'friend',
   };

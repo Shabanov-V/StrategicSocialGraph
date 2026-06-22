@@ -24,7 +24,7 @@ function reconcileColor(form, availableGroups) {
   return form;
 }
 
-function InteractivePanel({ yamlText, setYamlText }) {
+function InteractivePanel({ yamlText, setYamlText, editTargetId, onEditTargetConsumed }) {
   const [activeTab, setActiveTab] = useState('add');
   const [people, setPeople] = useState([]);
   const [selectedPerson, setSelectedPerson] = useState('');
@@ -81,6 +81,17 @@ function InteractivePanel({ yamlText, setYamlText }) {
     }
   }, [selectedPerson, people]);
 
+  // Jump straight to editing a person when asked from elsewhere (e.g. the graph
+  // node panel's "Изменить" link). Consume the request so a repeat jump to the
+  // same person re-triggers.
+  useEffect(() => {
+    if (editTargetId != null) {
+      setActiveTab('edit');
+      setSelectedPerson(String(editTargetId));
+      onEditTargetConsumed?.();
+    }
+  }, [editTargetId, onEditTargetConsumed]);
+
   // Focus the name field when the Add tab is shown.
   useEffect(() => {
     if (activeTab === 'add') nameRef.current?.focus();
@@ -129,6 +140,12 @@ function InteractivePanel({ yamlText, setYamlText }) {
     const sectorValue = form.sector === '__other' ? form.customSector : form.sector;
     const draft = { ...form, sector: sectorValue, circle: parseInt(form.circle, 10) };
     delete draft.customSector;
+    // Recall is optional: drop it when blank so no empty key is written.
+    if (typeof draft.recall !== 'string' || draft.recall.trim() === '') {
+      delete draft.recall;
+    } else {
+      draft.recall = draft.recall.trim();
+    }
     return draft;
   };
 

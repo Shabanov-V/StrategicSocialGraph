@@ -16,6 +16,8 @@ export interface Person {
   direction?: string;
   quality?: string;
   color_group?: string;
+  /** Optional short "how I know them" phrase that re-identifies the person after the name label alone stops jogging memory. */
+  recall?: string;
   notes?: NoteEntry[];
   /** ISO dates (YYYY-MM-DD) on which this person was contacted; sorted, deduped. */
   contacts?: string[];

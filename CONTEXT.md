@@ -19,7 +19,16 @@ The name of the central person (`center`). Rendered as the fixed node at the mid
 
 ## Person
 
-An entry in `people`, identified by a numeric `id`. Carries `name`, `sector`, `circle`, `importance`, `strength`, `direction`, `quality`, `color_group`. Invariant: `circle ∈ {1, 2, 3}`; `name` and `sector` are required.
+An entry in `people`, identified by a numeric `id`. Carries `name`, `sector`, `circle`, `importance`, `strength`, `direction`, `quality`, `color_group`, `recall`. Invariant: `circle ∈ {1, 2, 3}`; `name` and `sector` are required.
+
+## Recall
+
+An optional short phrase on a Person describing **how the user knows them** — "Tom's sister", "barista at Txt café". It is the identity anchor that survives memory decay: when the `name` label alone no longer says who the person is months later, the recall phrase re-identifies them.
+
+Distinct from two neighbours it is often confused with:
+
+- **`name`** is the *display label* and the connection key (peer connections reference it). Recall never participates in edge integrity — renaming a person does not touch `recall`.
+- **`notes`** is a *time-series log* (appended over time, e.g. by Daily Check-in). Recall is a *single stable descriptor*, not a journal entry.
 
 ## Peer Connection
 

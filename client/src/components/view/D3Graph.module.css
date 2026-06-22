@@ -57,6 +57,24 @@
   margin-bottom: 8px;
 }
 
+.nodeRecall {
+  font-size: 13px;
+  color: var(--dark-gray);
+  font-style: italic;
+  margin-bottom: 8px;
+}
+
+.editBtn {
+  font-size: 12px;
+  background: none;
+  border: none;
+  color: var(--accent, #2563eb);
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 8px;
+  text-decoration: underline;
+}
+
 .addRow {
   display: flex;
   gap: 6px;

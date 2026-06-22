@@ -90,6 +90,19 @@ function PersonForm({
         </select>
       </div>
 
+      <div className={styles.formGroup}>
+        <label htmlFor="recall">Who is this?</label>
+        <input
+          type="text"
+          id="recall"
+          name="recall"
+          maxLength={80}
+          placeholder="e.g. Tom's sister, barista at Txt"
+          value={formData.recall ?? ''}
+          onChange={handleChange}
+        />
+      </div>
+
       {colorGroups && Object.keys(colorGroups).length > 0 && (
         <div className={styles.formGroup}>
           <label htmlFor="color_group">Color Group:</label>

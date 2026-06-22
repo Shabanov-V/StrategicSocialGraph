@@ -23,6 +23,7 @@ const STORAGE_KEY = 'graphYaml';
 function App() {
   const [yamlText, setYamlText] = useState('');
   const [selectedPanel, setSelectedPanel] = useState(null);
+  const [editTargetId, setEditTargetId] = useState(null);
   const [graphData, setGraphData] = useState(null);
   const [yamlError, setYamlError] = useState(null);
   const [conflict, setConflict] = useState(null);
@@ -138,11 +139,23 @@ function App() {
     });
   }, []);
 
+  const handleEditPerson = useCallback((id) => {
+    setEditTargetId(id);
+    setSelectedPanel('interactive');
+  }, []);
+
   const choosePanel = () => {
     if (selectedPanel === 'code') {
       return <CodePanel value={yamlText} onChange={setYamlText} error={yamlError} />;
     } else if (selectedPanel === 'interactive') {
-      return <InteractivePanel yamlText={yamlText} setYamlText={setYamlText} />;
+      return (
+        <InteractivePanel
+          yamlText={yamlText}
+          setYamlText={setYamlText}
+          editTargetId={editTargetId}
+          onEditTargetConsumed={() => setEditTargetId(null)}
+        />
+      );
     } else if (selectedPanel === 'connection') {
       return <ConnectionEditor yamlText={yamlText} setYamlText={setYamlText} />;
     } else if (selectedPanel === 'config') {
@@ -159,7 +172,7 @@ function App() {
         setSelectedPanel={setSelectedPanel}
         selectedPanel={selectedPanel}
         left={choosePanel()}
-        right={<D3Graph graphData={graphData} onAddNote={handleAddNote} onRemoveNote={handleRemoveNote} />}
+        right={<D3Graph graphData={graphData} onAddNote={handleAddNote} onRemoveNote={handleRemoveNote} onEditPerson={handleEditPerson} />}
         authSlot={
           authLoading ? null : user ? (
             <>

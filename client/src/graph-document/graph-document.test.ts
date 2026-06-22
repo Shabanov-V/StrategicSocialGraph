@@ -58,6 +58,42 @@ describe('addPerson', () => {
   });
 });
 
+describe('recall', () => {
+  it('round-trips a recall phrase through addPerson', () => {
+    const out = addPerson(BASE, {
+      name: 'Sarah',
+      sector: 'Work',
+      circle: 2,
+      recall: "Tom's sister",
+    });
+    const sarah = listPeople(out).find((p) => p.name === 'Sarah');
+    expect(sarah?.recall).toBe("Tom's sister");
+  });
+
+  it('sets recall via editPerson, leaving other fields and comments intact', () => {
+    const withComment = `center: Alex
+people:
+  - id: 1
+    name: Mom # closest
+    sector: Family
+    circle: 1
+`;
+    const out = editPerson(withComment, 1, { recall: 'my mother' });
+    const mom = listPeople(out).find((p) => p.id === 1);
+    expect(mom?.recall).toBe('my mother');
+    expect(mom?.sector).toBe('Family');
+    expect(mom?.circle).toBe(1);
+    expect(out).toContain('# closest');
+  });
+
+  it('leaves recall undefined when none was supplied', () => {
+    const out = addPerson(BASE, { name: 'Bob', sector: 'Work', circle: 2 });
+    const bob = listPeople(out).find((p) => p.name === 'Bob');
+    expect(bob?.recall).toBeUndefined();
+    expect(out).not.toContain('recall');
+  });
+});
+
 describe('nextPersonId', () => {
   it('returns the smallest free positive id, skipping gaps', () => {
     const yaml = `people:\n  - id: 1\n    name: A\n  - id: 3\n    name: C\n`;
