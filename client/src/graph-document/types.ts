@@ -17,6 +17,8 @@ export interface Person {
   quality?: string;
   color_group?: string;
   notes?: NoteEntry[];
+  /** ISO dates (YYYY-MM-DD) on which this person was contacted; sorted, deduped. */
+  contacts?: string[];
 }
 
 /** Fields a caller supplies when adding a person; id is assigned by the module. */

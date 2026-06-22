@@ -1,0 +1,83 @@
+// @vitest-environment jsdom
+import React, { useState } from 'react';
+import { describe, it, expect } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
+import DailyCheckin from './DailyCheckin';
+import { getContactDates } from '../../graph-document';
+import { todayISO } from '../../utils/contact-time';
+
+const TODAY = todayISO();
+
+function Harness({ initial }) {
+  const [yamlText, setYamlText] = useState(initial);
+  return (
+    <>
+      <DailyCheckin yamlText={yamlText} setYamlText={setYamlText} />
+      <pre data-testid="yaml">{yamlText}</pre>
+    </>
+  );
+}
+
+const yaml = () => screen.getByTestId('yaml').textContent;
+
+const TWO = `people:
+  - id: 1
+    name: Mom
+    circle: 1
+  - id: 2
+    name: Dad
+    circle: 1
+`;
+
+describe('DailyCheckin', () => {
+  it('pre-checks people already contacted today', () => {
+    const initial = `people:
+  - id: 1
+    name: Mom
+    circle: 1
+    contacts:
+      - ${TODAY}
+  - id: 2
+    name: Dad
+    circle: 1
+`;
+    render(<Harness initial={initial} />);
+    expect(screen.getByRole('checkbox', { name: 'Mom' })).toBeChecked();
+    expect(screen.getByRole('checkbox', { name: 'Dad' })).not.toBeChecked();
+  });
+
+  it('Save stamps today onto newly checked people', async () => {
+    const user = userEvent.setup();
+    render(<Harness initial={TWO} />);
+    await user.click(screen.getByRole('checkbox', { name: 'Dad' }));
+    await user.click(screen.getByRole('button', { name: /save/i }));
+    expect(getContactDates(yaml(), 2)).toEqual([TODAY]);
+    expect(getContactDates(yaml(), 1)).toEqual([]);
+  });
+
+  it('Save removes today from unchecked people but keeps older dates', async () => {
+    const user = userEvent.setup();
+    const initial = `people:
+  - id: 1
+    name: Mom
+    circle: 1
+    contacts:
+      - '2026-01-01'
+      - ${TODAY}
+`;
+    render(<Harness initial={initial} />);
+    await user.click(screen.getByRole('checkbox', { name: 'Mom' })); // uncheck
+    await user.click(screen.getByRole('button', { name: /save/i }));
+    expect(getContactDates(yaml(), 1)).toEqual(['2026-01-01']);
+  });
+
+  it('search filters the visible people by name', async () => {
+    const user = userEvent.setup();
+    render(<Harness initial={TWO} />);
+    await user.type(screen.getByPlaceholderText(/search/i), 'Mo');
+    expect(screen.getByRole('checkbox', { name: 'Mom' })).toBeInTheDocument();
+    expect(screen.queryByRole('checkbox', { name: 'Dad' })).not.toBeInTheDocument();
+  });
+});
