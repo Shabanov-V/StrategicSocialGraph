@@ -29,3 +29,107 @@
   border-radius: 4px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
+
+.closeBtn {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  border: none;
+  background: none;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--medium-gray);
+}
+
+.closeBtn:hover {
+  color: var(--very-dark-gray);
+}
+
+.nodeName {
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.nodeMeta {
+  font-size: 12px;
+  color: var(--dark-gray);
+  margin-bottom: 8px;
+}
+
+.addRow {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.noteInput {
+  flex: 1;
+  box-sizing: border-box;
+  padding: 6px;
+  border: 1px solid var(--medium-gray);
+  border-radius: 4px;
+  font: inherit;
+}
+
+.addBtn {
+  flex: 0 0 auto;
+  width: 32px;
+  border: none;
+  border-radius: 4px;
+  background: var(--very-dark-gray, #333);
+  color: #fff;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.addBtn:hover {
+  opacity: 0.9;
+}
+
+.noteList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 180px;
+  overflow-y: auto;
+  text-align: left;
+  border-top: 1px solid var(--light-gray);
+}
+
+.noteItem {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--light-gray);
+  font-size: 13px;
+}
+
+.noteDate {
+  flex: 0 0 auto;
+  color: var(--medium-gray);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.noteText {
+  flex: 1;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.noteDel {
+  flex: 0 0 auto;
+  border: none;
+  background: none;
+  color: var(--medium-gray);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.noteDel:hover {
+  color: #c0392b;
+}
