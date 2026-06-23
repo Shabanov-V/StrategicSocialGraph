@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styles from '../common/styles.module.css';
 import { listPeople, setContactsForDate } from '../../graph-document';
-import { todayISO, formatLastContact } from '../../utils/contact-time';
+import { checkinDayISO, formatLastContact } from '../../utils/contact-time';
 
 const CIRCLES = [1, 2, 3];
 
@@ -14,7 +14,7 @@ const byImportanceThenName = (a, b) => {
 };
 
 function DailyCheckin({ yamlText, setYamlText }) {
-  const today = todayISO();
+  const today = checkinDayISO();
   const people = listPeople(yamlText);
 
   // Seed the working set once from who's already logged today; the user edits from there.

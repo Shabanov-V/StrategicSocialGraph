@@ -1,12 +1,21 @@
 // Date helpers for the contact log. All dates are ISO calendar dates (YYYY-MM-DD),
 // not timestamps. Day math is done in local time so day boundaries match the user.
 
-/** Today's local calendar date as YYYY-MM-DD (not UTC, unlike toISOString). */
-export function todayISO() {
-  const now = new Date();
-  const y = now.getFullYear();
-  const m = String(now.getMonth() + 1).padStart(2, '0');
-  const d = String(now.getDate()).padStart(2, '0');
+// The Check-in Day boundary: the logical day flips at 03:00 local, not midnight.
+// 00:00–02:59 belongs to the previous day. See "Check-in Day" in CONTEXT.md.
+const CHECKIN_DAY_OFFSET_HOURS = 3;
+
+/**
+ * The current Check-in Day as a local YYYY-MM-DD date (not UTC).
+ * Shifts `now` back 3h before reading the local date, so the day boundary
+ * is 03:00. Epoch-subtract then local-read keeps it DST-safe. `now` is
+ * injectable for testing.
+ */
+export function checkinDayISO(now = new Date()) {
+  const shifted = new Date(now.getTime() - CHECKIN_DAY_OFFSET_HOURS * 3_600_000);
+  const y = shifted.getFullYear();
+  const m = String(shifted.getMonth() + 1).padStart(2, '0');
+  const d = String(shifted.getDate()).padStart(2, '0');
   return `${y}-${m}-${d}`;
 }
 

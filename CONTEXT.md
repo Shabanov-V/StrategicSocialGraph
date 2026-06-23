@@ -59,6 +59,14 @@ The Person the user is currently acting on, identified by `id` — never by `nam
 
 The single surface that shows and edits one [Selected Person](#selected-person): their [Recall](#recall), their [notes](#person), and a jump-to-edit. It is keyed by `id` and has **two entry points** — a graph-node tap and a [Graph Search](#graph-search) pick — but is one surface, not two divergent note UIs. On mobile it is a **bottom sheet** (`NodePanel`); the [Graph Search](#graph-search) focus pan lands the node in the clear area *above* the sheet, not under it.
 
+## Check-in Day
+
+The logical day the [Daily Check-in](#person) panel operates on — **not** the raw calendar date. The day boundary is **03:00 local time**, not midnight: the window 00:00–02:59 belongs to the *previous* Check-in Day. Defined as the calendar date of `now − 3h`.
+
+Rationale: a contact logged late at night (e.g. 01:30) belongs to the day the user is still "living", not the calendar date that already ticked over. A fresh, empty check-in only begins at 03:00.
+
+The Check-in Day is the single notion of "today" the check-in feature uses — it seeds which people are pre-checked, the date written to the contact log on save, the "today" label, and the `formatLastContact` "today"/"<n>d" math. All derive from one producer (`todayISO`), so the boundary lives in exactly one place.
+
 ## Graph Search
 
 A search box overlaid on the graph that finds a [Person](#person) by text and takes the user to them — the non-hunting way to reach a [Selected Person](#selected-person). Two effects on pick: it **selects** the Person (opens [Person Detail](#person-detail)) and **focuses** them (pans/zooms the graph to center their node). It does *not* highlight the node with a ring.

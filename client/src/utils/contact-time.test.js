@@ -1,9 +1,21 @@
 import { describe, it, expect } from 'vitest';
-import { todayISO, daysSince, formatLastContact } from './contact-time';
+import { checkinDayISO, daysSince, formatLastContact } from './contact-time';
 
-describe('todayISO', () => {
-  it('returns the local date as YYYY-MM-DD', () => {
-    expect(todayISO()).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+describe('checkinDayISO', () => {
+  it('returns the previous calendar date before the 03:00 boundary', () => {
+    expect(checkinDayISO(new Date(2026, 5, 23, 2, 59))).toBe('2026-06-22');
+  });
+
+  it('flips to the new date at exactly 03:00', () => {
+    expect(checkinDayISO(new Date(2026, 5, 23, 3, 0))).toBe('2026-06-23');
+  });
+
+  it('returns the same date during the day', () => {
+    expect(checkinDayISO(new Date(2026, 5, 23, 12, 0))).toBe('2026-06-23');
+  });
+
+  it('counts just-past-midnight as the previous day', () => {
+    expect(checkinDayISO(new Date(2026, 5, 23, 0, 10))).toBe('2026-06-22');
   });
 });
 

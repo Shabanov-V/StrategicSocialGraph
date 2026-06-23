@@ -6,9 +6,9 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import DailyCheckin from './DailyCheckin';
 import { getContactDates } from '../../graph-document';
-import { todayISO } from '../../utils/contact-time';
+import { checkinDayISO } from '../../utils/contact-time';
 
-const TODAY = todayISO();
+const TODAY = checkinDayISO();
 
 function Harness({ initial }) {
   const [yamlText, setYamlText] = useState(initial);
