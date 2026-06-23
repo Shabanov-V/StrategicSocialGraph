@@ -6,6 +6,17 @@
   border: 1px solid var(--light-gray);
 }
 
+.searchOverlay {
+  position: absolute;
+  top: 8px;
+  /* Clear the left icon rail: .rightPanel (z-index:1) traps this overlay's
+     stacking context below the sidebar (z-index:10), so the rail paints over
+     anything starting at the far left. Inset past the rail instead. */
+  left: 60px;
+  right: 8px;
+  z-index: 11;
+}
+
 .loadingContainer {
   display: flex;
   justify-content: center;

@@ -3,10 +3,15 @@ import * as d3 from 'd3';
 import { processGraphDataForD3, createSimulation, getD3Style, constrainToSector } from '../../utils/d3-helper';
 import styles from './D3Graph.module.css';
 import NodePanel from './NodePanel';
+import GraphSearch from './GraphSearch';
 
 const D3Graph = ({ graphData, onAddNote, onRemoveNote, onEditPerson }) => {
     const svgRef = useRef(null);
     const containerRef = useRef(null);
+    // Bridge from the d3 effect closure to React handlers: lets GraphSearch focus
+    // a node by id without re-rendering the graph.
+    const zoomRef = useRef(null);
+    const nodeByIdRef = useRef(new Map());
     const [selectedNode, setSelectedNode] = useState(null);
     const [noteInput, setNoteInput] = useState('');
 
@@ -14,15 +19,32 @@ const D3Graph = ({ graphData, onAddNote, onRemoveNote, onEditPerson }) => {
         setNoteInput('');
     }, [selectedNode]);
 
-    // Notes are derived live from the document so the list refreshes after each add.
+    // Selection is keyed by id, never name — so a rename or a name collision can't
+    // misroute notes. Derived live so the list refreshes after each add.
     const currentNotes = selectedNode
-        ? (graphData?.people?.find(p => p.name === selectedNode.name)?.notes ?? [])
+        ? (graphData?.people?.find(p => p.id === selectedNode.id)?.notes ?? [])
         : [];
 
     // Recall is derived live too, so an edit refreshes the panel without reselecting.
     const currentRecall = selectedNode
-        ? (graphData?.people?.find(p => p.name === selectedNode.name)?.recall ?? undefined)
+        ? (graphData?.people?.find(p => p.id === selectedNode.id)?.recall ?? undefined)
         : undefined;
+
+    // Entry point shared with the graph-node click: select the Person and pan the
+    // graph so their node lands above the detail sheet (offset, not dead-center).
+    const focusPerson = (id) => {
+        const datum = nodeByIdRef.current.get(id);
+        if (!datum) return;
+        setSelectedNode(datum);
+        const zoom = zoomRef.current;
+        if (!zoom || !svgRef.current || !containerRef.current) return;
+        const { width, height } = containerRef.current.getBoundingClientRect();
+        const k = 1.5;
+        const transform = d3.zoomIdentity
+            .translate(width / 2 - k * datum.x, height * 0.4 - k * datum.y)
+            .scale(k);
+        d3.select(svgRef.current).transition().duration(400).call(zoom.transform, transform);
+    };
 
     const handleAddNote = () => {
         const text = noteInput.trim();
@@ -211,6 +233,10 @@ const D3Graph = ({ graphData, onAddNote, onRemoveNote, onEditPerson }) => {
         });
         svg.call(zoom);
 
+        // Publish the handles GraphSearch needs to focus a node by id.
+        zoomRef.current = zoom;
+        nodeByIdRef.current = new Map(nodes.map(n => [n.id, n]));
+
     }, [graphData]);
 
     if (!graphData) {
@@ -223,6 +249,9 @@ const D3Graph = ({ graphData, onAddNote, onRemoveNote, onEditPerson }) => {
 
     return (
         <div ref={containerRef} className={styles.container}>
+            <div className={styles.searchOverlay}>
+                <GraphSearch people={graphData.people ?? []} onSelect={focusPerson} />
+            </div>
             <svg ref={svgRef}></svg>
             {selectedNode && (
                 <NodePanel

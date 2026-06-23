@@ -1,0 +1,56 @@
+/* Mobile-first: full-width input, large touch rows, dropdown that scrolls. */
+.input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  font-size: 16px; /* >=16px stops iOS zoom-on-focus */
+  border: 1px solid var(--medium-gray);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.dropdown {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  max-height: 50vh;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid var(--light-gray);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: 100%;
+  min-height: 44px; /* touch target */
+  padding: 8px 14px;
+  border: none;
+  border-bottom: 1px solid var(--light-gray);
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.row:active {
+  background: var(--light-gray);
+}
+
+.name {
+  font-weight: 600;
+}
+
+.recall {
+  color: var(--dark-gray);
+  font-style: italic;
+}

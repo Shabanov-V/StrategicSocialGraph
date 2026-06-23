@@ -125,7 +125,7 @@ function App() {
   const handleAddNote = useCallback((node, text) => {
     const date = new Date().toISOString().slice(0, 10);
     setYamlText(prev => {
-      const person = listPeople(prev).find(p => p.name === node.name);
+      const person = listPeople(prev).find(p => p.id === node.id);
       if (!person) return prev;
       return addNote(prev, person.id, { date, text });
     });
@@ -133,7 +133,7 @@ function App() {
 
   const handleRemoveNote = useCallback((node, index) => {
     setYamlText(prev => {
-      const person = listPeople(prev).find(p => p.name === node.name);
+      const person = listPeople(prev).find(p => p.id === node.id);
       if (!person) return prev;
       return removeNote(prev, person.id, index);
     });

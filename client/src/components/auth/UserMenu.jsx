@@ -12,8 +12,8 @@ export default function UserMenu() {
       {user.picture && (
         <img src={user.picture} alt="" className={styles.avatar} referrerPolicy="no-referrer" />
       )}
-      <button onClick={logout} className={styles.logoutButton} title="Sign out">
-        Sign out
+      <button onClick={logout} className={styles.logoutButton} title="Sign out" aria-label="Sign out">
+        ⏻
       </button>
     </div>
   );
