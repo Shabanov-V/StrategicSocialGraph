@@ -11,21 +11,21 @@
 }
 
 .saving {
-  color: var(--dark-gray);
-  background: var(--light-gray);
+  color: var(--text-muted);
+  background: var(--neutral-100);
 }
 
 .saved {
-  color: #2d7d46;
-  background: #e6f4ea;
+  color: var(--color-success);
+  background: var(--color-success-bg);
 }
 
 .error {
-  color: var(--error-red);
-  background: #ffeaea;
+  color: var(--color-danger);
+  background: var(--color-danger-bg);
 }
 
 .offline {
-  color: #b8860b;
-  background: #fff8dc;
+  color: var(--color-warning);
+  background: var(--color-warning-bg);
 }

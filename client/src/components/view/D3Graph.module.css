@@ -3,7 +3,7 @@
   position: relative;
   width: 100%;
   height: 100%;
-  border: 1px solid var(--light-gray);
+  border: 1px solid var(--neutral-100);
 }
 
 .searchOverlay {
@@ -22,7 +22,7 @@
   justify-content: center;
   align-items: center;
   height: 100%;
-  border: 1px solid var(--light-gray);
+  border: 1px solid var(--neutral-100);
 }
 
 .infoPanel {
@@ -31,7 +31,7 @@
   bottom: 20px;
   transform: translateX(-50%);
   padding: 10px;
-  border: 1px solid var(--medium-gray);
+  border: 1px solid var(--border);
   background: rgba(249, 249, 249, 0.9);
   z-index: 10;
   min-width: 250px;
@@ -50,11 +50,11 @@
   font-size: 18px;
   line-height: 1;
   cursor: pointer;
-  color: var(--medium-gray);
+  color: var(--border);
 }
 
 .closeBtn:hover {
-  color: var(--very-dark-gray);
+  color: var(--text);
 }
 
 .nodeName {
@@ -64,13 +64,13 @@
 
 .nodeMeta {
   font-size: 12px;
-  color: var(--dark-gray);
+  color: var(--text-muted);
   margin-bottom: 8px;
 }
 
 .nodeRecall {
   font-size: 13px;
-  color: var(--dark-gray);
+  color: var(--text-muted);
   font-style: italic;
   margin-bottom: 8px;
 }
@@ -79,7 +79,7 @@
   font-size: 12px;
   background: none;
   border: none;
-  color: var(--accent, #2563eb);
+  color: var(--color-primary);
   cursor: pointer;
   padding: 0;
   margin-bottom: 8px;
@@ -96,7 +96,7 @@
   flex: 1;
   box-sizing: border-box;
   padding: 6px;
-  border: 1px solid var(--medium-gray);
+  border: 1px solid var(--border);
   border-radius: 4px;
   font: inherit;
 }
@@ -106,8 +106,8 @@
   width: 32px;
   border: none;
   border-radius: 4px;
-  background: var(--very-dark-gray, #333);
-  color: #fff;
+  background: var(--text);
+  color: var(--surface);
   font-size: 18px;
   line-height: 1;
   cursor: pointer;
@@ -124,7 +124,7 @@
   max-height: 180px;
   overflow-y: auto;
   text-align: left;
-  border-top: 1px solid var(--light-gray);
+  border-top: 1px solid var(--neutral-100);
 }
 
 .noteItem {
@@ -132,13 +132,13 @@
   align-items: baseline;
   gap: 8px;
   padding: 6px 0;
-  border-bottom: 1px solid var(--light-gray);
+  border-bottom: 1px solid var(--neutral-100);
   font-size: 13px;
 }
 
 .noteDate {
   flex: 0 0 auto;
-  color: var(--medium-gray);
+  color: var(--border);
   font-size: 11px;
   font-variant-numeric: tabular-nums;
 }
@@ -153,12 +153,12 @@
   flex: 0 0 auto;
   border: none;
   background: none;
-  color: var(--medium-gray);
+  color: var(--border);
   font-size: 15px;
   line-height: 1;
   cursor: pointer;
 }
 
 .noteDel:hover {
-  color: #c0392b;
+  color: var(--color-danger-hover);
 }

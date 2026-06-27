@@ -6,9 +6,14 @@
   --color-danger: #dc3545;
   --color-danger-hover: #c82333;
   --color-success: #2e7d32;
+  --color-success-bg: #e6f4ea;
+  --color-danger-bg: #ffeaea;
+  --color-warning: #b8860b;
+  --color-warning-bg: #fff8dc;
 
   --surface: #ffffff;
   --surface-overlay: #f5f7fa;
+  --neutral-100: #f0f0f0;
   --text: #333333;
   --text-muted: #666666;
   --border: #cccccc;
@@ -37,15 +42,4 @@
   /* Elevation */
   --shadow-panel: 0 4px 16px rgba(0, 0, 0, 0.12);
 
-  /* Legacy aliases — removed in Task 9 */
-  --primary-blue: var(--color-primary);
-  --primary-blue-hover: var(--color-primary-hover);
-  --light-gray: #f0f0f0;
-  --medium-gray: var(--border);
-  --dark-gray: var(--text-muted);
-  --very-dark-gray: var(--text);
-  --white: var(--surface);
-  --off-white: var(--surface-overlay);
-  --error-red: #ff6b6b;
-  --error-red-hover: #ee5253;
 }

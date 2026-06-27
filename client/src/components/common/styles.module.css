@@ -3,7 +3,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  background-color: var(--white);
+  background-color: var(--surface);
   border-radius: 8px;
   margin: 16px;
   transition: box-shadow 0.3s ease, transform 0.3s ease;
@@ -14,7 +14,7 @@
   flex-grow: 1;
   position: relative;
   padding: 16px;
-  background-color: var(--white);
+  background-color: var(--surface);
   border-radius: 4px;
 }.tabs {
   display: flex;
@@ -23,15 +23,15 @@
 
 .tabButton {
   padding: 0.5rem 1rem;
-  border: 1px solid var(--medium-gray);
+  border: 1px solid var(--border);
   cursor: pointer;
-  background-color: var(--light-gray);
+  background-color: var(--neutral-100);
   border-radius: 4px 4px 0 0;
   margin-right: 0.25rem;
 }
 
 .tabButton.active {
-  background-color: var(--white);
+  background-color: var(--surface);
   border-bottom: 1px solid transparent;
 }
 
@@ -53,15 +53,15 @@
 .formGroup select {
   width: 100%;
   padding: 0.5rem;
-  border: 1px solid var(--medium-gray);
+  border: 1px solid var(--border);
   border-radius: 4px;
 }
 
 .submitButton {
   padding: 0.75rem;
   border: none;
-  background-color: var(--primary-blue);
-  color: var(--white);
+  background-color: var(--color-primary);
+  color: var(--surface);
   border-radius: 4px;
   cursor: pointer;
   font-size: 1rem;
@@ -69,32 +69,32 @@
 }
 
 .submitButton:hover {
-  background-color: var(--primary-blue-hover);
+  background-color: var(--color-primary-hover);
 }
 
 .deleteButton {
-  background-color: #dc3545; /* Bootstrap-like red */
+  background-color: var(--color-danger);
   margin-top: 0.5rem;
 }
 
 .deleteButton:hover {
-  background-color: #c82333;
+  background-color: var(--color-danger-hover);
 }
 
 .deleteAllButton {
-  background-color: #dc3545;
+  background-color: var(--color-danger);
   margin-top: 2rem;
   font-weight: bold;
 }
 
 .deleteAllButton:hover {
-  background-color: #c82333;
+  background-color: var(--color-danger-hover);
 }
 
 .advancedToggle {
   background: none;
   border: none;
-  color: var(--primary-blue);
+  color: var(--color-primary);
   cursor: pointer;
   padding: 0;
   margin-bottom: 1rem;
@@ -107,7 +107,7 @@
 }
 
 .confirmMessage {
-  color: #2e7d32; /* green */
+  color: var(--color-success);
   font-size: 0.9rem;
   margin: 4px 0 8px 0;
 }

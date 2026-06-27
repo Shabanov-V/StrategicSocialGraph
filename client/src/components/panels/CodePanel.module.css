@@ -7,7 +7,7 @@
 }
 
 .button {
-  background-color: #007bff;
+  background-color: var(--color-primary);
   color: white;
   border: none;
   padding: 8px 12px;
@@ -17,12 +17,12 @@
 }
 
 .button:hover {
-  background-color: #004c9e;
+  background-color: var(--color-primary-active);
 }
 
 .errorPanel {
   padding: 16px;
-  background: linear-gradient(to right, #ff6b6b, #ee5253);
+  background: linear-gradient(to right, var(--color-danger), var(--color-danger-hover));
   color: white;
   white-space: pre-wrap;
   word-break: break-word;

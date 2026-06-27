@@ -1,6 +1,6 @@
 .sidebar {
-  background: var(--very-dark-gray);
-  color: var(--white);
+  background: var(--text);
+  color: var(--surface);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -14,7 +14,7 @@
 .toggleButton {
   background: none;
   border: none;
-  color: #fff;
+  color: var(--surface);
   font-size: 24px;
   margin: 16px 0;
   cursor: pointer;
