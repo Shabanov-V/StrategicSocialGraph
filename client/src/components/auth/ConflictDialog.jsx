@@ -1,4 +1,5 @@
 import React from 'react';
+import Button from '../ui/Button';
 import styles from './ConflictDialog.module.css';
 
 export default function ConflictDialog({ onKeepLocal, onKeepCloud }) {
@@ -8,8 +9,8 @@ export default function ConflictDialog({ onKeepLocal, onKeepCloud }) {
         <h3>Data conflict</h3>
         <p>You have a local graph and a cloud graph. Which do you want to keep?</p>
         <div className={styles.actions}>
-          <button className={styles.button} onClick={onKeepLocal}>Keep local</button>
-          <button className={`${styles.button} ${styles.primary}`} onClick={onKeepCloud}>Keep cloud</button>
+          <Button variant="secondary" onClick={onKeepLocal}>Keep local</Button>
+          <Button variant="primary" onClick={onKeepCloud}>Keep cloud</Button>
         </div>
       </div>
     </div>

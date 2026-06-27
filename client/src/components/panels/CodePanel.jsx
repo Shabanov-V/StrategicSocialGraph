@@ -1,5 +1,6 @@
 import React from 'react';
 import Editor from '../ui/Editor';
+import Button from '../ui/Button';
 import styles from './CodePanel.module.css';
 
 function CodePanel({ value, onChange, error }) {
@@ -35,12 +36,8 @@ function CodePanel({ value, onChange, error }) {
   return (
     <div className={styles.panel}>
       <div className={styles.toolbar}>
-        <button className={styles.button} onClick={handleDownload}>
-          Download
-        </button>
-        <button className={styles.button} onClick={handleUploadClick}>
-          Upload
-        </button>
+        <Button variant="primary" size="sm" onClick={handleDownload}>Download</Button>
+        <Button variant="secondary" size="sm" onClick={handleUploadClick}>Upload</Button>
         <input
           type="file"
           ref={fileInputRef}
