@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import Select from 'react-select';
 import styles from '../common/styles.module.css';
 import Tabs from '../ui/Tabs';
+import Field from '../ui/Field';
+import Select from '../ui/Select';
+import PersonSelect from '../ui/PersonSelect';
 import {
   listPeople,
   listConnections,
@@ -152,88 +154,78 @@ function ConnectionEditor({ yamlText, setYamlText }) {
 
       {activeTab === 'add' && (
         <form className={styles.form} onSubmit={handleSubmit}>
-          <div className={styles.formGroup}>
-            <label htmlFor="from">From Person:</label>
-            <Select
+          <Field label="From Person:" htmlFor="from">
+            <PersonSelect
               inputId="from"
-              name="from"
               options={peopleOptions}
-              value={peopleOptions.find(o => o.value === formData.from) || null}
-              onChange={opt => handleChange({ target: { name: 'from', value: opt ? opt.value : '' } })}
-              isClearable
+              value={formData.from}
+              onChange={val => handleChange({ target: { name: 'from', value: val } })}
               placeholder="-- select person --"
             />
-          </div>
+          </Field>
 
-          <div className={styles.formGroup}>
-            <label htmlFor="to">To Person:</label>
-            <Select
+          <Field label="To Person:" htmlFor="to">
+            <PersonSelect
               inputId="to"
-              name="to"
               options={peopleOptions}
-              value={peopleOptions.find(o => o.value === formData.to) || null}
-              onChange={opt => handleChange({ target: { name: 'to', value: opt ? opt.value : '' } })}
-              isClearable
+              value={formData.to}
+              onChange={val => handleChange({ target: { name: 'to', value: val } })}
               placeholder="-- select person --"
             />
-          </div>
+          </Field>
 
-          <div className={styles.formGroup}>
-            <label htmlFor="strength">Strength:</label>
-            <select
+          <Field label="Strength:" htmlFor="strength">
+            <Select
               id="strength"
               name="strength"
               value={formData.strength}
               onChange={handleChange}
-            >
-              <option value="normal">Normal</option>
-              <option value="strong">Strong</option>
-              <option value="weak">Weak</option>
-            </select>
-          </div>
+              options={[
+                { value: 'normal', label: 'Normal' },
+                { value: 'strong', label: 'Strong' },
+                { value: 'weak', label: 'Weak' },
+              ]}
+            />
+          </Field>
 
-          <div className={styles.formGroup}>
-            <label htmlFor="direction">Direction:</label>
-            <select
+          <Field label="Direction:" htmlFor="direction">
+            <Select
               id="direction"
               name="direction"
               value={formData.direction}
               onChange={handleChange}
-            >
-              <option value="mutual">Mutual</option>
-              <option value="incoming">Incoming</option>
-              <option value="outgoing">Outgoing</option>
-            </select>
-          </div>
+              options={[
+                { value: 'mutual', label: 'Mutual' },
+                { value: 'incoming', label: 'Incoming' },
+                { value: 'outgoing', label: 'Outgoing' },
+              ]}
+            />
+          </Field>
 
-          <div className={styles.formGroup}>
-            <label htmlFor="quality">Quality:</label>
-            <select
+          <Field label="Quality:" htmlFor="quality">
+            <Select
               id="quality"
               name="quality"
               value={formData.quality}
               onChange={handleChange}
-            >
-              <option value="positive">Positive</option>
-              <option value="negative">Negative</option>
-              <option value="neutral">Neutral</option>
-            </select>
-          </div>
+              options={[
+                { value: 'positive', label: 'Positive' },
+                { value: 'negative', label: 'Negative' },
+                { value: 'neutral', label: 'Neutral' },
+              ]}
+            />
+          </Field>
 
           {Object.keys(colorGroups).length > 0 && (
-            <div className={styles.formGroup}>
-              <label htmlFor="color_group">Color Group:</label>
-              <select
+            <Field label="Color Group:" htmlFor="color_group">
+              <Select
                 id="color_group"
                 name="color_group"
                 value={formData.color_group}
                 onChange={handleChange}
-              >
-                {Object.keys(colorGroups).map(group => (
-                  <option key={group} value={group}>{group}</option>
-                ))}
-              </select>
-            </div>
+                options={Object.keys(colorGroups).map(group => ({ value: group, label: group }))}
+              />
+            </Field>
           )}
 
           <button type="submit" className={styles.submitButton}>
@@ -244,85 +236,75 @@ function ConnectionEditor({ yamlText, setYamlText }) {
 
       {activeTab === 'edit' && (
         <div>
-          <div className={styles.formGroup}>
-            <label htmlFor="editFrom">Person 1:</label>
-            <Select
+          <Field label="Person 1:" htmlFor="editFrom">
+            <PersonSelect
               inputId="editFrom"
-              name="editFrom"
               options={peopleOptions}
-              value={peopleOptions.find(o => o.value === editFrom) || null}
-              onChange={opt => setEditFrom(opt ? opt.value : '')}
-              isClearable
+              value={editFrom}
+              onChange={val => setEditFrom(val)}
               placeholder="-- select person --"
             />
-          </div>
-          <div className={styles.formGroup}>
-            <label htmlFor="editTo">Person 2:</label>
-            <Select
+          </Field>
+          <Field label="Person 2:" htmlFor="editTo">
+            <PersonSelect
               inputId="editTo"
-              name="editTo"
               options={peopleOptions}
-              value={peopleOptions.find(o => o.value === editTo) || null}
-              onChange={opt => setEditTo(opt ? opt.value : '')}
-              isClearable
+              value={editTo}
+              onChange={val => setEditTo(val)}
               placeholder="-- select person --"
             />
-          </div>
+          </Field>
           {selectedConnection && (
             <form className={styles.form}>
-              <div className={styles.formGroup}>
-                <label htmlFor="strength">Strength:</label>
-                <select
+              <Field label="Strength:" htmlFor="strength">
+                <Select
                   id="strength"
                   name="strength"
                   value={formData.strength}
                   onChange={handleChange}
-                >
-                  <option value="normal">Normal</option>
-                  <option value="strong">Strong</option>
-                  <option value="weak">Weak</option>
-                </select>
-              </div>
-              <div className={styles.formGroup}>
-                <label htmlFor="direction">Direction:</label>
-                <select
+                  options={[
+                    { value: 'normal', label: 'Normal' },
+                    { value: 'strong', label: 'Strong' },
+                    { value: 'weak', label: 'Weak' },
+                  ]}
+                />
+              </Field>
+              <Field label="Direction:" htmlFor="direction">
+                <Select
                   id="direction"
                   name="direction"
                   value={formData.direction}
                   onChange={handleChange}
-                >
-                  <option value="mutual">Mutual</option>
-                  <option value="incoming">Incoming</option>
-                  <option value="outgoing">Outgoing</option>
-                </select>
-              </div>
-              <div className={styles.formGroup}>
-                <label htmlFor="quality">Quality:</label>
-                <select
+                  options={[
+                    { value: 'mutual', label: 'Mutual' },
+                    { value: 'incoming', label: 'Incoming' },
+                    { value: 'outgoing', label: 'Outgoing' },
+                  ]}
+                />
+              </Field>
+              <Field label="Quality:" htmlFor="quality">
+                <Select
                   id="quality"
                   name="quality"
                   value={formData.quality}
                   onChange={handleChange}
-                >
-                  <option value="positive">Positive</option>
-                  <option value="negative">Negative</option>
-                  <option value="neutral">Neutral</option>
-                </select>
-              </div>
+                  options={[
+                    { value: 'positive', label: 'Positive' },
+                    { value: 'negative', label: 'Negative' },
+                    { value: 'neutral', label: 'Neutral' },
+                  ]}
+                />
+              </Field>
               {Object.keys(colorGroups).length > 0 && (
-                <div className={styles.formGroup}>
-                  <label htmlFor="color_group">Color Group:</label>
-                  <select
+                <Field label="Color Group:" htmlFor="color_group">
+                  <Select
                     id="color_group"
                     name="color_group"
                     value={formData.color_group}
                     onChange={handleChange}
-                  >
-                    {Object.keys(colorGroups).map(group => (
-                      <option key={group} value={group}>{group}</option>
-                    ))}
-                  </select>
-                </div>
+                    options={Object.keys(colorGroups).map(group => ({ value: group, label: group }))}
+                  />
+                </Field>
               )}
               <button type="submit" className={styles.submitButton} onClick={handleEditSubmit}>
                 Save Changes
