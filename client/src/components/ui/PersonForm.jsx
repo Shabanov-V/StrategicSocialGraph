@@ -1,5 +1,7 @@
 import React from 'react';
 import styles from '../common/styles.module.css';
+import Field from './Field';
+import Select from './Select';
 
 function PersonForm({
   formData,
@@ -16,8 +18,7 @@ function PersonForm({
 }) {
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
-      <div className={styles.formGroup}>
-        <label htmlFor="name">Name:</label>
+      <Field label="Name:" htmlFor="name">
         <input
           type="text"
           id="name"
@@ -27,12 +28,11 @@ function PersonForm({
           onChange={handleChange}
           required
         />
-      </div>
+      </Field>
 
       <input type="hidden" id="id" name="id" value={formData.id} />
 
-      <div className={styles.formGroup}>
-        <label htmlFor="sector">Sector:</label>
+      <Field label="Sector:" htmlFor="sector">
         <select
           id="sector"
           name="sector"
@@ -59,39 +59,38 @@ function PersonForm({
             style={{ marginTop: '6px' }}
           />
         )}
-      </div>
+      </Field>
 
-      <div className={styles.formGroup}>
-        <label htmlFor="circle">Circle:</label>
-        <select
+      <Field label="Circle:" htmlFor="circle">
+        <Select
           id="circle"
           name="circle"
           value={formData.circle}
           onChange={handleChange}
           required
-        >
-          <option value="1">1</option>
-          <option value="2">2</option>
-          <option value="3">3</option>
-        </select>
-      </div>
+          options={[
+            { value: '1', label: '1' },
+            { value: '2', label: '2' },
+            { value: '3', label: '3' },
+          ]}
+        />
+      </Field>
 
-      <div className={styles.formGroup}>
-        <label htmlFor="importance">Importance:</label>
-        <select
+      <Field label="Importance:" htmlFor="importance">
+        <Select
           id="importance"
           name="importance"
           value={formData.importance}
           onChange={handleChange}
-        >
-          <option value="normal">Normal</option>
-          <option value="high">High</option>
-          <option value="low">Low</option>
-        </select>
-      </div>
+          options={[
+            { value: 'normal', label: 'Normal' },
+            { value: 'high', label: 'High' },
+            { value: 'low', label: 'Low' },
+          ]}
+        />
+      </Field>
 
-      <div className={styles.formGroup}>
-        <label htmlFor="recall">Who is this?</label>
+      <Field label="Who is this?" htmlFor="recall">
         <input
           type="text"
           id="recall"
@@ -101,11 +100,10 @@ function PersonForm({
           value={formData.recall ?? ''}
           onChange={handleChange}
         />
-      </div>
+      </Field>
 
       {colorGroups && Object.keys(colorGroups).length > 0 && (
-        <div className={styles.formGroup}>
-          <label htmlFor="color_group">Color Group:</label>
+        <Field label="Color Group:" htmlFor="color_group">
           <select
             id="color_group"
             name="color_group"
@@ -116,7 +114,7 @@ function PersonForm({
               <option key={group} value={group}>{group}</option>
             ))}
           </select>
-        </div>
+        </Field>
       )}
 
       <button
@@ -130,47 +128,47 @@ function PersonForm({
 
       {advancedOpen && (
         <>
-          <div className={styles.formGroup}>
-            <label htmlFor="strength">Strength:</label>
-            <select
+          <Field label="Strength:" htmlFor="strength">
+            <Select
               id="strength"
               name="strength"
               value={formData.strength}
               onChange={handleChange}
-            >
-              <option value="normal">Normal</option>
-              <option value="strong">Strong</option>
-              <option value="weak">Weak</option>
-            </select>
-          </div>
+              options={[
+                { value: 'normal', label: 'Normal' },
+                { value: 'strong', label: 'Strong' },
+                { value: 'weak', label: 'Weak' },
+              ]}
+            />
+          </Field>
 
-          <div className={styles.formGroup}>
-            <label htmlFor="direction">Direction:</label>
-            <select
+          <Field label="Direction:" htmlFor="direction">
+            <Select
               id="direction"
               name="direction"
               value={formData.direction}
               onChange={handleChange}
-            >
-              <option value="mutual">Mutual</option>
-              <option value="incoming">Incoming</option>
-              <option value="outgoing">Outgoing</option>
-            </select>
-          </div>
+              options={[
+                { value: 'mutual', label: 'Mutual' },
+                { value: 'incoming', label: 'Incoming' },
+                { value: 'outgoing', label: 'Outgoing' },
+              ]}
+            />
+          </Field>
 
-          <div className={styles.formGroup}>
-            <label htmlFor="quality">Quality:</label>
-            <select
+          <Field label="Quality:" htmlFor="quality">
+            <Select
               id="quality"
               name="quality"
               value={formData.quality}
               onChange={handleChange}
-            >
-              <option value="positive">Positive</option>
-              <option value="negative">Negative</option>
-              <option value="neutral">Neutral</option>
-            </select>
-          </div>
+              options={[
+                { value: 'positive', label: 'Positive' },
+                { value: 'negative', label: 'Negative' },
+                { value: 'neutral', label: 'Neutral' },
+              ]}
+            />
+          </Field>
         </>
       )}
 
