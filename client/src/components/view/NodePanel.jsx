@@ -20,7 +20,7 @@ function NodePanel({
 
   return (
     <div className={styles.infoPanel}>
-      <IconButton label="Закрыть" className={styles.closeBtn} onClick={onClose}>×</IconButton>
+      <IconButton label="Close" className={styles.closeBtn} onClick={onClose}>×</IconButton>
       <div className={styles.nodeName}>{node.name}</div>
 
       {recall && <div className={styles.nodeRecall}>{recall}</div>}
@@ -31,7 +31,7 @@ function NodePanel({
           className={styles.editBtn}
           onClick={() => onEditPerson?.(node.id)}
         >
-          Изменить
+          Edit
         </button>
       )}
 
@@ -43,7 +43,7 @@ function NodePanel({
           onKeyDown={(e) => {
             if (e.key === 'Enter') onAddNote();
           }}
-          placeholder="Добавить заметку..."
+          placeholder="Add note…"
         />
         <button className={styles.addBtn} onClick={onAddNote}>
           +
@@ -59,7 +59,7 @@ function NodePanel({
               <button
                 className={styles.noteDel}
                 onClick={() => onRemoveNote?.(node, i)}
-                aria-label="Удалить заметку"
+                aria-label="Delete note"
               >
                 ×
               </button>

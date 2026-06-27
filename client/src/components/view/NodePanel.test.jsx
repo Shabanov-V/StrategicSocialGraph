@@ -48,7 +48,7 @@ describe('NodePanel', () => {
     expect(screen.queryByText(/Важность/)).not.toBeInTheDocument();
   });
 
-  it('fires onEditPerson with the node id when Изменить is clicked', async () => {
+  it('fires onEditPerson with the node id when Edit is clicked', async () => {
     const user = userEvent.setup();
     const onEditPerson = vi.fn();
     render(
@@ -59,7 +59,7 @@ describe('NodePanel', () => {
         onEditPerson={onEditPerson}
       />
     );
-    await user.click(screen.getByRole('button', { name: 'Изменить' }));
+    await user.click(screen.getByRole('button', { name: 'Edit' }));
     expect(onEditPerson).toHaveBeenCalledWith(3);
   });
 });
