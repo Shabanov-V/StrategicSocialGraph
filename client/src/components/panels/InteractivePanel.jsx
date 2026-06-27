@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Select from 'react-select';
 import styles from '../common/styles.module.css';
 import PersonForm from '../ui/PersonForm';
+import Tabs from '../ui/Tabs';
 import { blankAddForm, stickyReset, hasNonDefaultAdvanced } from './person-form';
 import {
   listPeople,
@@ -190,20 +191,11 @@ function InteractivePanel({ yamlText, setYamlText, editTargetId, onEditTargetCon
 
   return (
     <div className={styles.panel}>
-      <div className={styles.tabs}>
-        <button
-          className={`${styles.tabButton} ${activeTab === 'add' ? styles.active : ''}`}
-          onClick={() => setActiveTab('add')}
-        >
-          Add
-        </button>
-        <button
-          className={`${styles.tabButton} ${activeTab === 'edit' ? styles.active : ''}`}
-          onClick={() => setActiveTab('edit')}
-        >
-          Edit
-        </button>
-      </div>
+      <Tabs
+        tabs={[{ id: 'add', label: 'Add' }, { id: 'edit', label: 'Edit' }]}
+        active={activeTab}
+        onChange={setActiveTab}
+      />
 
       {activeTab === 'add' && (
         <PersonForm

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import styles from '../common/styles.module.css';
+import Tabs from '../ui/Tabs';
 import { read, getIn, setIn, deleteIn, renameKey, renameColorGroup } from '../../graph-document';
 
 // Read the subtree at `path` from the rendered plain-object view.
@@ -191,11 +192,11 @@ function ConfigEditor({ yamlText, setYamlText }) {
 
   return (
     <div className={styles.panel} style={{ height: 'auto', minHeight: '100%' }}>
-      <div className={styles.tabs} style={{ flexShrink: 0 }}>
-        <button className={`${styles.tabButton} ${activeTab === 'general' ? styles.active : ''}`} onClick={() => setActiveTab('general')}>General</button>
-        <button className={`${styles.tabButton} ${activeTab === 'layout' ? styles.active : ''}`} onClick={() => setActiveTab('layout')}>Layout</button>
-        <button className={`${styles.tabButton} ${activeTab === 'display' ? styles.active : ''}`} onClick={() => setActiveTab('display')}>Display</button>
-      </div>
+      <Tabs
+        tabs={[{ id: 'general', label: 'General' }, { id: 'layout', label: 'Layout' }, { id: 'display', label: 'Display' }]}
+        active={activeTab}
+        onChange={setActiveTab}
+      />
       <div style={{ padding: '0 16px', overflow: 'visible', paddingBottom: '32px' }}>
         {activeTab === 'general' && (
           <div className={styles.formGroup} style={{ boxSizing: 'border-box', width: '100%' }}>

@@ -133,7 +133,7 @@ describe('Edit person flow', () => {
     const user = userEvent.setup();
     render(<PersonHarness />);
 
-    await user.click(screen.getByRole('button', { name: 'Edit' }));
+    await user.click(screen.getByRole('tab', { name: 'Edit' }));
     // Pick Mom from the react-select person picker.
     await user.click(screen.getByLabelText('Person:'));
     await user.keyboard('{ArrowDown}{Enter}');
