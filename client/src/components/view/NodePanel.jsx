@@ -1,5 +1,6 @@
 import React from 'react';
 import styles from './D3Graph.module.css';
+import IconButton from '../ui/IconButton';
 
 // Presentational detail panel for a selected graph node. Kept free of d3 so its
 // behavior (recall display, edit-jump, notes) is testable without the SVG.
@@ -19,9 +20,7 @@ function NodePanel({
 
   return (
     <div className={styles.infoPanel}>
-      <button className={styles.closeBtn} onClick={onClose} aria-label="Закрыть">
-        ×
-      </button>
+      <IconButton label="Закрыть" className={styles.closeBtn} onClick={onClose}>×</IconButton>
       <div className={styles.nodeName}>{node.name}</div>
 
       {recall && <div className={styles.nodeRecall}>{recall}</div>}

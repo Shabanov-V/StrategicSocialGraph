@@ -1,68 +1,42 @@
 import React from 'react';
 import styles from './Sidebar.module.css';
+import IconButton from '../ui/IconButton';
 import codeIcon from '../../assets/code.svg';
 import formIcon from '../../assets/form.svg';
 import connectionIcon from '../../assets/connection.svg';
 import settingsIcon from '../../assets/settings.svg';
 
-export default function Sidebar({ isOpen, selectedPanel, setSelectedPanel, authSlot }) {
+const ITEMS = [
+  { id: 'code', label: 'Edit YAML', icon: codeIcon, alt: 'Toggle code' },
+  { id: 'interactive', label: 'Add person', icon: formIcon, alt: 'Toggle interactive' },
+  { id: 'connection', label: 'Edit connections', icon: connectionIcon, alt: 'Toggle connection editor' },
+  { id: 'config', label: 'Settings', icon: settingsIcon, alt: 'Toggle config editor' },
+];
 
+export default function Sidebar({ selectedPanel, setSelectedPanel, authSlot }) {
   function togglePanel(targetPanel) {
-    if (selectedPanel === targetPanel) {
-      setSelectedPanel(null);
-    } else {
-      setSelectedPanel(targetPanel);
-    }
+    setSelectedPanel(selectedPanel === targetPanel ? null : targetPanel);
   }
 
   return (
-    <div
-      className={styles.sidebar}
-    >
-      <button
-        className={styles.toggleButton}
-        onClick={() => togglePanel('code')}
-        aria-label={isOpen ? 'Hide sidebar' : 'Show sidebar'}
-      >
-        <span className={styles.icon}>
-          <img src={codeIcon} alt="Toggle code" />
-        </span>
-      </button>
-      <button
-        className={styles.toggleButton}
-        onClick={() => togglePanel('interactive')}
-        aria-label={isOpen ? 'Hide sidebar' : 'Show sidebar'}
-      >
-        <span className={styles.icon}>
-          <img src={formIcon} alt="Toggle interactive" />
-        </span>
-      </button>
-      <button
-        className={styles.toggleButton}
-        onClick={() => togglePanel('connection')}
-        aria-label={isOpen ? 'Hide sidebar' : 'Show sidebar'}
-      >
-        <span className={styles.icon}>
-          <img src={connectionIcon} alt="Toggle connection editor" />
-        </span>
-      </button>
-      <button
-        className={styles.toggleButton}
-        onClick={() => togglePanel('config')}
-        aria-label={isOpen ? 'Hide sidebar' : 'Show sidebar'}
-      >
-        <span className={styles.icon}>
-          <img src={settingsIcon} alt="Toggle config editor" />
-        </span>
-      </button>
-      <button
-        className={styles.toggleButton}
+    <div className={styles.sidebar}>
+      {ITEMS.map(({ id, label, icon, alt }) => (
+        <IconButton
+          key={id}
+          label={label}
+          active={selectedPanel === id}
+          onClick={() => togglePanel(id)}
+        >
+          <span className={styles.icon}><img src={icon} alt={alt} /></span>
+        </IconButton>
+      ))}
+      <IconButton
+        label="Daily check-in"
+        active={selectedPanel === 'checkin'}
         onClick={() => togglePanel('checkin')}
-        aria-label="Toggle daily check-in"
-        title="Daily check-in"
       >
         <span className={styles.icon} style={{ fontSize: '20px', lineHeight: 1 }}>✓</span>
-      </button>
+      </IconButton>
       <div className={styles.spacer} />
       {authSlot}
     </div>
