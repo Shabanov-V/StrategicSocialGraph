@@ -41,4 +41,12 @@ describe('formatLastContact', () => {
   it('returns "<n>d" using the most recent date', () => {
     expect(formatLastContact(['2026-06-10', '2026-06-19'], '2026-06-22')).toBe('3d');
   });
+
+  it('ignores contacts after the reference date (last contact as of that day)', () => {
+    expect(formatLastContact(['2026-06-20', '2026-06-25'], '2026-06-22')).toBe('2d');
+  });
+
+  it('returns "never" when every contact is after the reference date', () => {
+    expect(formatLastContact(['2026-06-25'], '2026-06-22')).toBe('never');
+  });
 });

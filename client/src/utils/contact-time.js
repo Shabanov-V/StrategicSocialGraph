@@ -26,12 +26,15 @@ export function daysSince(isoDate, today) {
 }
 
 /**
- * Human label for a person's most recent contact relative to `today`:
- * "never" when empty, "today" for 0 days, otherwise "<n>d".
+ * Human label for a person's most recent contact *as of* `today`:
+ * "never" when there is no contact on-or-before `today`, "today" for 0 days,
+ * otherwise "<n>d". Contacts after `today` are ignored so a past Check-in Date
+ * never measures against a later contact (no negative days).
  */
 export function formatLastContact(dates, today) {
-  if (!dates || dates.length === 0) return 'never';
-  const latest = [...dates].sort().at(-1);
+  const upToToday = (dates ?? []).filter((d) => d <= today);
+  if (upToToday.length === 0) return 'never';
+  const latest = upToToday.sort().at(-1);
   const n = daysSince(latest, today);
   return n === 0 ? 'today' : `${n}d`;
 }

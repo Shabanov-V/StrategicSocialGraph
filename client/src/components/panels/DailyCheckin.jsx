@@ -13,15 +13,26 @@ const byImportanceThenName = (a, b) => {
   return String(a.name).localeCompare(String(b.name));
 };
 
+// Who is already logged on `date`, as a Set of ids — the seed baseline for that day.
+const seedFor = (people, date) =>
+  new Set(people.filter(p => (p.contacts ?? []).includes(date)).map(p => p.id));
+
+const sameSet = (a, b) => a.size === b.size && [...a].every(id => b.has(id));
+
 function DailyCheckin({ yamlText, setYamlText }) {
-  const today = checkinDayISO();
+  const checkinDay = checkinDayISO();
   const people = listPeople(yamlText);
 
-  // Seed the working set once from who's already logged today; the user edits from there.
-  const [checked, setChecked] = useState(
-    () => new Set(people.filter(p => (p.contacts ?? []).includes(today)).map(p => p.id)),
-  );
+  // The date the panel operates on (the Check-in Date). Defaults to "today".
+  const [date, setDate] = useState(checkinDay);
+  // Working set + the baseline it was seeded from, both for the active date.
+  // Nothing persists to the document until Save.
+  const [checked, setChecked] = useState(() => seedFor(people, checkinDay));
+  const [seed, setSeed] = useState(() => seedFor(people, checkinDay));
   const [search, setSearch] = useState('');
+
+  const today = date; // reference point for last-contact labels and the seed window
+  const dirty = !sameSet(checked, seed);
 
   const toggle = (id) => {
     setChecked(prev => {
@@ -32,8 +43,18 @@ function DailyCheckin({ yamlText, setYamlText }) {
     });
   };
 
+  const changeDate = (nextDate) => {
+    if (!nextDate || nextDate === date) return;
+    if (dirty && !window.confirm(`Discard unsaved changes for ${date}?`)) return;
+    const reseeded = seedFor(people, nextDate);
+    setDate(nextDate);
+    setChecked(reseeded);
+    setSeed(reseeded);
+  };
+
   const save = () => {
-    setYamlText(setContactsForDate(yamlText, today, [...checked]));
+    setYamlText(setContactsForDate(yamlText, date, [...checked]));
+    setSeed(new Set(checked)); // saved set is the new baseline — no longer dirty
   };
 
   const term = search.trim().toLowerCase();
@@ -45,7 +66,14 @@ function DailyCheckin({ yamlText, setYamlText }) {
     <div className={styles.panel} style={{ height: 'auto', minHeight: '100%' }}>
       <div style={{ padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <strong>Daily Check-in</strong>
-        <span style={{ color: '#555' }}>{today}</span>
+        <input
+          type="date"
+          aria-label="Check-in date"
+          value={date}
+          max={checkinDay}
+          onChange={e => changeDate(e.target.value)}
+          style={{ width: 'auto', color: '#555' }}
+        />
       </div>
       <div style={{ padding: '0 16px 8px' }}>
         <input
@@ -93,7 +121,7 @@ function DailyCheckin({ yamlText, setYamlText }) {
         })}
       </div>
       <div style={{ padding: '0 16px 24px' }}>
-        <button type="button" onClick={save}>Save today's contacts</button>
+        <button type="button" onClick={save}>Save contacts</button>
       </div>
     </div>
   );

@@ -65,7 +65,13 @@ The logical day the [Daily Check-in](#person) panel operates on — **not** the 
 
 Rationale: a contact logged late at night (e.g. 01:30) belongs to the day the user is still "living", not the calendar date that already ticked over. A fresh, empty check-in only begins at 03:00.
 
-The Check-in Day is the single notion of "today" the check-in feature uses — it seeds which people are pre-checked, the date written to the contact log on save, the "today" label, and the `formatLastContact` "today"/"<n>d" math. All derive from one producer (`todayISO`), so the boundary lives in exactly one place.
+The Check-in Day is the single notion of "today" the check-in feature uses: it is the **default** [Check-in Date](#check-in-date) and the **upper bound** on it (no future dates). It derives from one producer (`todayISO`), so the boundary lives in exactly one place.
+
+## Check-in Date
+
+The date the [Daily Check-in](#person) panel is **currently operating on** — distinct from [Check-in Day](#check-in-day) ("today"). Defaults to the Check-in Day, but the user can move it back to any past calendar date to **backfill a forgotten day** (e.g. logging Tuesday's contact on Thursday). Cannot exceed the Check-in Day; no lower bound.
+
+The Check-in Date is the single date everything in the panel keys off: it seeds which people are pre-checked (who was already logged on that date), it is the date written to the contact log on save, the date label shown, and the reference point for the `formatLastContact` "today"/"<n>d" math. "today" in those labels means *the Check-in Date*, not the wall-clock today.
 
 ## Graph Search
 
