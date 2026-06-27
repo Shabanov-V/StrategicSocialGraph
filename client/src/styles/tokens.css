@@ -1,0 +1,51 @@
+:root {
+  /* Color — semantic */
+  --color-primary: #007bff;
+  --color-primary-hover: #0056b3;
+  --color-primary-active: #004c9e;
+  --color-danger: #dc3545;
+  --color-danger-hover: #c82333;
+  --color-success: #2e7d32;
+
+  --surface: #ffffff;
+  --surface-overlay: #f5f7fa;
+  --text: #333333;
+  --text-muted: #666666;
+  --border: #cccccc;
+
+  /* Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-pill: 999px;
+
+  /* Space */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  /* Type */
+  --font-size-sm: 0.85rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.2rem;
+  --font-weight-normal: 400;
+  --font-weight-bold: 700;
+
+  /* Elevation */
+  --shadow-panel: 0 4px 16px rgba(0, 0, 0, 0.12);
+
+  /* Legacy aliases — removed in Task 9 */
+  --primary-blue: var(--color-primary);
+  --primary-blue-hover: var(--color-primary-hover);
+  --light-gray: #f0f0f0;
+  --medium-gray: var(--border);
+  --dark-gray: var(--text-muted);
+  --very-dark-gray: var(--text);
+  --white: var(--surface);
+  --off-white: var(--surface-overlay);
+  --error-red: #ff6b6b;
+  --error-red-hover: #ee5253;
+}
