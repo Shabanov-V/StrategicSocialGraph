@@ -16,6 +16,7 @@ import styles from './App.module.css';
 import './App.css';
 import { calculateSectorAngles } from './utils/layout-helper.js';
 import { read, listPeople, addNote, removeNote } from './graph-document';
+import PanelShell from './components/ui/PanelShell';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 const STORAGE_KEY = 'graphYaml';
@@ -145,23 +146,26 @@ function App() {
   }, []);
 
   const choosePanel = () => {
+    const close = () => setSelectedPanel(null);
     if (selectedPanel === 'code') {
-      return <CodePanel value={yamlText} onChange={setYamlText} error={yamlError} />;
+      return <PanelShell title="YAML" onClose={close}><CodePanel value={yamlText} onChange={setYamlText} error={yamlError} /></PanelShell>;
     } else if (selectedPanel === 'interactive') {
       return (
-        <InteractivePanel
-          yamlText={yamlText}
-          setYamlText={setYamlText}
-          editTargetId={editTargetId}
-          onEditTargetConsumed={() => setEditTargetId(null)}
-        />
+        <PanelShell title="People" onClose={close}>
+          <InteractivePanel
+            yamlText={yamlText}
+            setYamlText={setYamlText}
+            editTargetId={editTargetId}
+            onEditTargetConsumed={() => setEditTargetId(null)}
+          />
+        </PanelShell>
       );
     } else if (selectedPanel === 'connection') {
-      return <ConnectionEditor yamlText={yamlText} setYamlText={setYamlText} />;
+      return <PanelShell title="Connections" onClose={close}><ConnectionEditor yamlText={yamlText} setYamlText={setYamlText} /></PanelShell>;
     } else if (selectedPanel === 'config') {
-      return <ConfigEditor yamlText={yamlText} setYamlText={setYamlText} />;
+      return <PanelShell title="Settings" onClose={close}><ConfigEditor yamlText={yamlText} setYamlText={setYamlText} /></PanelShell>;
     } else if (selectedPanel === 'checkin') {
-      return <DailyCheckin yamlText={yamlText} setYamlText={setYamlText} />;
+      return <PanelShell title="Daily Check-in" onClose={close}><DailyCheckin yamlText={yamlText} setYamlText={setYamlText} /></PanelShell>;
     }
     return null;
   };

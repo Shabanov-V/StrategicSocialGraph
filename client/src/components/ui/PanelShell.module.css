@@ -1,0 +1,10 @@
+.shell { display: flex; flex-direction: column; height: 100%; }
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border);
+}
+.title { font-size: var(--font-size-lg); font-weight: var(--font-weight-bold); color: var(--text); }
+.body { flex: 1; overflow-y: auto; padding: var(--space-4); }

@@ -64,8 +64,7 @@ function DailyCheckin({ yamlText, setYamlText }) {
 
   return (
     <div className={styles.panel} style={{ height: 'auto', minHeight: '100%' }}>
-      <div style={{ padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <strong>Daily Check-in</strong>
+      <div style={{ padding: '12px 16px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
         <input
           type="date"
           aria-label="Check-in date"
