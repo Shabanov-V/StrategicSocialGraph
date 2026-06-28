@@ -57,6 +57,10 @@ export function useCloudSync(user, yamlText) {
     const onOnline = async () => {
       if (!userRef.current || !readyRef.current) return;
       if (yamlRef.current === lastSavedRef.current) return;
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
       setSyncStatus('saving');
       const ok = await saveGraph(yamlRef.current);
       setSyncStatus(ok ? 'saved' : 'error');

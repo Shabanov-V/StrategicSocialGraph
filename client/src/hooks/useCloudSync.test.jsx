@@ -89,4 +89,37 @@ describe('useCloudSync reconnect auto-resync', () => {
 
     expect(global.fetch).not.toHaveBeenCalled();
   });
+
+  it('cancels pending debounce on reconnect flush so save fires exactly once', async () => {
+    vi.useFakeTimers();
+    global.fetch = vi.fn().mockResolvedValue({ ok: true });
+    setOnline(true);
+
+    const { result, rerender } = renderHook(
+      ({ yamlText }) => useCloudSync({ id: 'u1' }, yamlText),
+      { initialProps: { yamlText: 'a: 1' } }
+    );
+
+    // Mark ready so the debounce effect is armed
+    await act(async () => {
+      result.current.markSyncReady();
+    });
+
+    // Change yamlText to start a debounce timer (2500ms)
+    rerender({ yamlText: 'a: 2' });
+
+    // Before the debounce fires, the browser comes back online — triggers immediate flush
+    await act(async () => {
+      window.dispatchEvent(new Event('online'));
+      await Promise.resolve();
+    });
+
+    // Advance past the debounce window; the cancelled timer must not fire again
+    await vi.advanceTimersByTimeAsync(3000);
+
+    // Only one PUT should have been made (the online flush, not a duplicate debounce)
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+
+    vi.useRealTimers();
+  });
 });
