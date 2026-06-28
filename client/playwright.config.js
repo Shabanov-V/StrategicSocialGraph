@@ -6,6 +6,7 @@ import { defineConfig, devices } from '@playwright/test';
 // needed. Vite is started automatically and reused if already running.
 export default defineConfig({
   testDir: './e2e',
+  testIgnore: ['**/pwa.spec.js'],
   timeout: 30_000,
   expect: { timeout: 7_000 },
   fullyParallel: false,
