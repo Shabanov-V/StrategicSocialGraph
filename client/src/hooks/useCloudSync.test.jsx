@@ -24,4 +24,31 @@ describe('useCloudSync offline detection', () => {
     });
     expect(result.current.syncStatus).toBe('offline');
   });
+
+  it('sets syncStatus to offline when save fails while device is offline', async () => {
+    vi.useFakeTimers();
+    global.fetch = vi.fn().mockRejectedValue(new Error('network error'));
+    setOnline(false);
+
+    const { result, rerender } = renderHook(
+      ({ yamlText }) => useCloudSync({ id: 'u1' }, yamlText),
+      { initialProps: { yamlText: 'a: 1' } }
+    );
+
+    // Arm the debounce effect
+    await act(async () => {
+      result.current.markSyncReady();
+    });
+
+    // Change yamlText to trigger a fresh debounce timer
+    rerender({ yamlText: 'a: 2' });
+
+    // Advance past the 2500ms debounce and flush pending promises
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(2600);
+    });
+
+    expect(result.current.syncStatus).toBe('offline');
+    vi.useRealTimers();
+  });
 });
