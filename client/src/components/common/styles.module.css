@@ -16,23 +16,6 @@
   padding: 16px;
   background-color: var(--surface);
   border-radius: 4px;
-}.tabs {
-  display: flex;
-  margin-bottom: 1rem;
-}
-
-.tabButton {
-  padding: 0.5rem 1rem;
-  border: 1px solid var(--border);
-  cursor: pointer;
-  background-color: var(--neutral-100);
-  border-radius: 4px 4px 0 0;
-  margin-right: 0.25rem;
-}
-
-.tabButton.active {
-  background-color: var(--surface);
-  border-bottom: 1px solid transparent;
 }
 
 .form {

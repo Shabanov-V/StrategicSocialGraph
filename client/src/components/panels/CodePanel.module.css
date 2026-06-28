@@ -8,7 +8,7 @@
 
 .button {
   background-color: var(--color-primary);
-  color: white;
+  color: var(--surface);
   border: none;
   padding: 8px 12px;
   border-radius: 4px;
@@ -23,7 +23,7 @@
 .errorPanel {
   padding: 16px;
   background: linear-gradient(to right, var(--color-danger), var(--color-danger-hover));
-  color: white;
+  color: var(--surface);
   white-space: pre-wrap;
   word-break: break-word;
   max-height: 200px;
