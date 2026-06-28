@@ -40,12 +40,18 @@ test('app boots and renders the graph while offline', async ({ page, context }) 
         const reg = await navigator.serviceWorker.getRegistration();
         if (!reg?.active) { setTimeout(checkReady, 200); return; }
         const keys = await caches.keys();
-        let total = 0;
+        let found = false;
         for (const k of keys) {
           const c = await caches.open(k);
-          total += (await c.keys()).length;
+          if (
+            await c.match('/index.html', { ignoreSearch: true }) ||
+            await c.match('/', { ignoreSearch: true })
+          ) {
+            found = true;
+            break;
+          }
         }
-        if (total >= 10) { window.__swFullyReady = true; }
+        if (found) { window.__swFullyReady = true; }
         else { setTimeout(checkReady, 200); }
       } catch (_) { setTimeout(checkReady, 200); }
     }
