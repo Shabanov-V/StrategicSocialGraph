@@ -1,4 +1,17 @@
 .field { margin-bottom: var(--space-4); }
+.field > input {
+  width: 100%;
+  box-sizing: border-box;
+  height: 36px;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background-color: var(--surface);
+  color: var(--text);
+  font-size: var(--font-size-md);
+  font-family: inherit;
+}
+.field > input:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 2px var(--color-primary); }
 .label { display: block; margin-bottom: var(--space-2); color: var(--text); }
 .hint { color: var(--text-muted); font-size: var(--font-size-sm); margin-top: var(--space-1); }
 .error { color: var(--color-danger); font-size: var(--font-size-sm); margin-top: var(--space-1); }

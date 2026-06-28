@@ -90,7 +90,7 @@ const D3Graph = ({ graphData, onAddNote, onRemoveNote, onEditPerson }) => {
                 .attr("cy", height / 2)
                 .attr("r", radius)
                 .attr("fill", "none")
-                .attr("stroke", "var(--medium-gray)")
+                .attr("stroke", "var(--border)")
                 .attr("stroke-width", 2)
                 .attr("stroke-dasharray", "5,5")
                 .attr("class", `circle-${i + 1}`);
@@ -114,7 +114,7 @@ const D3Graph = ({ graphData, onAddNote, onRemoveNote, onEditPerson }) => {
                     endAngle
                 }))
                 .attr("transform", `translate(${width/2},${height/2})`)
-                .attr("fill", "var(--light-gray)")
+                .attr("fill", "var(--neutral-100)")
                 .attr("stroke", "none")
                 .attr("opacity", 0.3);
 
@@ -125,7 +125,7 @@ const D3Graph = ({ graphData, onAddNote, onRemoveNote, onEditPerson }) => {
                     endAngle: startAngle
                 }))
                 .attr("transform", `translate(${width/2},${height/2})`)
-                .attr("stroke", "var(--dark-gray)")
+                .attr("stroke", "var(--text-muted)")
                 .attr("stroke-width", 2)
                 .attr("fill", "none");
 
@@ -139,7 +139,7 @@ const D3Graph = ({ graphData, onAddNote, onRemoveNote, onEditPerson }) => {
                 .attr("y", labelY)
                 .attr("text-anchor", "middle")
                 .attr("dominant-baseline", "middle")
-                .attr("fill", "var(--dark-gray)")
+                .attr("fill", "var(--text-muted)")
                 .attr("font-size", "14px")
                 .attr("class", "sector-label")
                 .text(sector.name);
@@ -149,7 +149,7 @@ const D3Graph = ({ graphData, onAddNote, onRemoveNote, onEditPerson }) => {
                 .attr("y", labelY + 20)
                 .attr("text-anchor", "middle")
                 .attr("dominant-baseline", "middle")
-                .attr("fill", "var(--medium-gray)")
+                .attr("fill", "var(--border)")
                 .attr("font-size", "12px")
                 .text(`(${sector.peopleCount})`);
         });
@@ -184,7 +184,7 @@ const D3Graph = ({ graphData, onAddNote, onRemoveNote, onEditPerson }) => {
             .attr('x', 12)
             .attr('y', 4)
             .attr("font-size", "12px")
-            .attr("fill", "var(--very-dark-gray)");
+            .attr("fill", "var(--text)");
 
         simulation.on("tick", () => {
             link

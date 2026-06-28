@@ -33,19 +33,18 @@ function PersonForm({
       <input type="hidden" id="id" name="id" value={formData.id} />
 
       <Field label="Sector:" htmlFor="sector">
-        <select
+        <Select
           id="sector"
           name="sector"
           value={formData.sector}
           onChange={handleChange}
           required
-        >
-          <option value="">-- select sector --</option>
-          {sectors.map(s => (
-            <option key={s} value={s}>{s}</option>
-          ))}
-          <option value="__other">Other (custom)</option>
-        </select>
+          options={[
+            { value: '', label: '-- select sector --' },
+            ...sectors.map(s => ({ value: s, label: s })),
+            { value: '__other', label: 'Other (custom)' },
+          ]}
+        />
 
         {formData.sector === '__other' && (
           <input
@@ -104,16 +103,13 @@ function PersonForm({
 
       {colorGroups && Object.keys(colorGroups).length > 0 && (
         <Field label="Color Group:" htmlFor="color_group">
-          <select
+          <Select
             id="color_group"
             name="color_group"
             value={formData.color_group}
             onChange={handleChange}
-          >
-            {Object.keys(colorGroups).map(group => (
-              <option key={group} value={group}>{group}</option>
-            ))}
-          </select>
+            options={Object.keys(colorGroups).map(group => ({ value: group, label: group }))}
+          />
         </Field>
       )}
 
