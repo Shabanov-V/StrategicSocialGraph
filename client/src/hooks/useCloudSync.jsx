@@ -32,6 +32,16 @@ export function useCloudSync(user, yamlText) {
     }
   }, []);
 
+  const applyResult = useCallback((ok) => {
+    if (statusTimerRef.current) clearTimeout(statusTimerRef.current);
+    if (ok) {
+      setSyncStatus('saved');
+      statusTimerRef.current = setTimeout(() => setSyncStatus('idle'), 2000);
+    } else {
+      setSyncStatus(navigator.onLine ? 'error' : 'offline');
+    }
+  }, []);
+
   useEffect(() => {
     if (!user || !yamlText || !syncReady || yamlText === lastSavedRef.current) return;
 
@@ -40,17 +50,14 @@ export function useCloudSync(user, yamlText) {
     timerRef.current = setTimeout(async () => {
       setSyncStatus('saving');
       const ok = await saveGraph(yamlText);
-      setSyncStatus(ok ? 'saved' : (navigator.onLine ? 'error' : 'offline'));
-      if (ok) {
-        statusTimerRef.current = setTimeout(() => setSyncStatus('idle'), 2000);
-      }
+      applyResult(ok);
     }, DEBOUNCE_MS);
 
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
       if (statusTimerRef.current) clearTimeout(statusTimerRef.current);
     };
-  }, [user, yamlText, syncReady, saveGraph]);
+  }, [user, yamlText, syncReady, saveGraph, applyResult]);
 
   useEffect(() => {
     const onOffline = () => setSyncStatus('offline');
@@ -63,7 +70,7 @@ export function useCloudSync(user, yamlText) {
       }
       setSyncStatus('saving');
       const ok = await saveGraph(yamlRef.current);
-      setSyncStatus(ok ? 'saved' : 'error');
+      applyResult(ok);
     };
     window.addEventListener('offline', onOffline);
     window.addEventListener('online', onOnline);
@@ -71,7 +78,7 @@ export function useCloudSync(user, yamlText) {
       window.removeEventListener('offline', onOffline);
       window.removeEventListener('online', onOnline);
     };
-  }, [saveGraph]);
+  }, [saveGraph, applyResult]);
 
   const fetchGraph = useCallback(async () => {
     try {

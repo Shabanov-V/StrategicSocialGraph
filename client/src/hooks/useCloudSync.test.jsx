@@ -122,4 +122,37 @@ describe('useCloudSync reconnect auto-resync', () => {
 
     vi.useRealTimers();
   });
+
+  it('reverts to idle 2 s after a successful reconnect flush', async () => {
+    vi.useFakeTimers();
+    global.fetch = vi.fn().mockResolvedValue({ ok: true });
+    setOnline(true);
+
+    // Stable user reference so the debounce effect dep doesn't change on re-renders
+    // (a new object literal each render would cause effect cleanup to clear statusTimerRef)
+    const user = { id: 'u1' };
+    const { result, rerender } = renderHook(
+      ({ yamlText }) => useCloudSync(user, yamlText),
+      { initialProps: { yamlText: 'a: 1' } }
+    );
+
+    await act(async () => {
+      result.current.markSyncReady();
+    });
+
+    rerender({ yamlText: 'a: 2' });
+
+    await act(async () => {
+      window.dispatchEvent(new Event('online'));
+      await Promise.resolve();
+    });
+
+    expect(result.current.syncStatus).toBe('saved');
+
+    act(() => { vi.advanceTimersByTime(2100); });
+
+    expect(result.current.syncStatus).toBe('idle');
+
+    vi.useRealTimers();
+  });
 });
