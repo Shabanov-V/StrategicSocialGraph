@@ -52,3 +52,41 @@ describe('useCloudSync offline detection', () => {
     vi.useRealTimers();
   });
 });
+
+describe('useCloudSync reconnect auto-resync', () => {
+  beforeEach(() => {
+    setOnline(true);
+    global.fetch = vi.fn().mockResolvedValue({ ok: true });
+  });
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('flushes a pending save when the browser comes back online', async () => {
+    const { result } = renderHook(() => useCloudSync({ id: 'u1' }, 'a: 1'));
+    act(() => { result.current.markSyncReady(); });
+
+    await act(async () => {
+      window.dispatchEvent(new Event('online'));
+      await Promise.resolve();
+    });
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      '/api/graph',
+      expect.objectContaining({ method: 'PUT' }),
+    );
+    expect(result.current.syncStatus).toBe('saved');
+  });
+
+  it('does not flush when there is no logged-in user', async () => {
+    const { result } = renderHook(() => useCloudSync(null, 'a: 1'));
+    act(() => { result.current.markSyncReady(); });
+
+    await act(async () => {
+      window.dispatchEvent(new Event('online'));
+      await Promise.resolve();
+    });
+
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+});

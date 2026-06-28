@@ -54,9 +54,20 @@ export function useCloudSync(user, yamlText) {
 
   useEffect(() => {
     const onOffline = () => setSyncStatus('offline');
+    const onOnline = async () => {
+      if (!userRef.current || !readyRef.current) return;
+      if (yamlRef.current === lastSavedRef.current) return;
+      setSyncStatus('saving');
+      const ok = await saveGraph(yamlRef.current);
+      setSyncStatus(ok ? 'saved' : 'error');
+    };
     window.addEventListener('offline', onOffline);
-    return () => window.removeEventListener('offline', onOffline);
-  }, []);
+    window.addEventListener('online', onOnline);
+    return () => {
+      window.removeEventListener('offline', onOffline);
+      window.removeEventListener('online', onOnline);
+    };
+  }, [saveGraph]);
 
   const fetchGraph = useCallback(async () => {
     try {
