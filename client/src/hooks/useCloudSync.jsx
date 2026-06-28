@@ -9,6 +9,13 @@ export function useCloudSync(user, yamlText) {
   const lastSavedRef = useRef('');
   const statusTimerRef = useRef(null);
 
+  const yamlRef = useRef(yamlText);
+  const userRef = useRef(user);
+  const readyRef = useRef(syncReady);
+  yamlRef.current = yamlText;
+  userRef.current = user;
+  readyRef.current = syncReady;
+
   const saveGraph = useCallback(async (yaml) => {
     try {
       const res = await fetch('/api/graph', {
@@ -33,7 +40,7 @@ export function useCloudSync(user, yamlText) {
     timerRef.current = setTimeout(async () => {
       setSyncStatus('saving');
       const ok = await saveGraph(yamlText);
-      setSyncStatus(ok ? 'saved' : 'error');
+      setSyncStatus(ok ? 'saved' : (navigator.onLine ? 'error' : 'offline'));
       if (ok) {
         statusTimerRef.current = setTimeout(() => setSyncStatus('idle'), 2000);
       }
@@ -44,6 +51,12 @@ export function useCloudSync(user, yamlText) {
       if (statusTimerRef.current) clearTimeout(statusTimerRef.current);
     };
   }, [user, yamlText, syncReady, saveGraph]);
+
+  useEffect(() => {
+    const onOffline = () => setSyncStatus('offline');
+    window.addEventListener('offline', onOffline);
+    return () => window.removeEventListener('offline', onOffline);
+  }, []);
 
   const fetchGraph = useCallback(async () => {
     try {
